@@ -1,18 +1,18 @@
 <script setup>
-import { baseUrl } from '../../utils/urlUtils';
-import { auth } from '../../libs/firebase';
+import { baseUrl } from "../../utils/urlUtils";
+import { auth } from "../../libs/firebase";
 
-import { useRouter } from 'vue-router';
-import { ref } from 'vue';
-import { storeToRefs } from 'pinia';
+import { useRouter } from "vue-router";
+import { ref } from "vue";
+import { storeToRefs } from "pinia";
 
-import { useToast } from '../../composables/useToast';
-import { useAuthStore } from '../../stores/authStore';
-import { useSidebarStore } from '../../stores/sidebarStore';
-import { useLoadingStore } from '../../stores/loadingStore';
+import { useToast } from "../../composables/useToast";
+import { useAuthStore } from "../../stores/authStore";
+import { useSidebarStore } from "../../stores/sidebarStore";
+import { useLoadingStore } from "../../stores/loadingStore";
 
-import UIButton from '../ui/UIButton.vue';
-import UIDropdown from '../ui/UIDropdown.vue';
+import UIButton from "../ui/UIButton.vue";
+import UIDropdown from "../ui/UIDropdown.vue";
 
 const authStore = useAuthStore();
 const loadingStore = useLoadingStore();
@@ -38,8 +38,7 @@ const logoutUser = async () => {
         isAccountDropdownActive.value = false;
     } catch ({ code, message }) {
         const errors = {
-            "auth/network-request-failed":
-                "Falha na conexão de rede. Verifique sua conexão e tente novamente.",
+            "auth/network-request-failed": "Falha na conexão de rede. Verifique sua conexão e tente novamente.",
             "auth/internal-error": "Erro interno do servidor. Tente novamente mais tarde.",
             "auth/no-current-user": "Nenhum usuário autenticado no momento.",
         };
@@ -61,10 +60,8 @@ const removeUser = async () => {
         isAccountDropdownActive.value = false;
     } catch ({ code, message }) {
         const errors = {
-            "auth/requires-recent-login":
-                "Para excluir sua conta, faça login e tente novamente.",
-            "auth/network-request-failed":
-                "Falha na conexão de rede. Verifique sua conexão e tente novamente.",
+            "auth/requires-recent-login": "Para excluir sua conta, faça login e tente novamente.",
+            "auth/network-request-failed": "Falha na conexão de rede. Verifique sua conexão e tente novamente.",
         };
 
         showToast("danger", errors[code] ?? message);
@@ -78,16 +75,19 @@ const removeUser = async () => {
     <header class="header-wrapper">
         <div class="header container">
             <div class="header__logo">
-                <UIButton variant="primary" isIcon @click="sidebarStore.toggleSidebar"
-                    v-if="sidebarStore.canShowSidebarToggler" title="Alternar menu de tópicos">
+                <UIButton
+                    variant="primary"
+                    isIcon
+                    @click="sidebarStore.toggleSidebar"
+                    v-if="sidebarStore.canShowSidebarToggler"
+                    title="Alternar menu de tópicos"
+                >
                     <fa :icon="sidebarStore.isTopicSidebarActive ? 'times' : 'bars'" />
                 </UIButton>
 
                 <RouterLink to="/" title="Acessar página inicial" class="logo">
-                    <img v-if="sidebarStore.canShowSidebarToggler" :src="baseUrl('logo_sm.svg')"
-                        alt="TaskFlow - logo do website" width="148" height="37" loading="lazy" />
-                    <img v-else :src="baseUrl('logo_lg.svg')" alt="TaskFlow - logo do website" width="176" height="37"
-                        loading="lazy" />
+                    <img :src="baseUrl('logo.svg')" alt="TaskFlow - logo do website" width="44" height="44" loading="lazy" />
+                    <span>MeF</span>
                 </RouterLink>
             </div>
 
@@ -99,8 +99,14 @@ const removeUser = async () => {
                             <p class="text text--smallest">{{ user.email }}</p>
                         </div>
 
-                        <img class="account__avatar" :src="user.photoURL" alt="Foto de perfil do usuário" width="37"
-                            height="37" :title="`Logado como: ${user.email}`" />
+                        <img
+                            class="account__avatar"
+                            :src="user.photoURL"
+                            alt="Foto de perfil do usuário"
+                            width="37"
+                            height="37"
+                            :title="`Logado como: ${user.email}`"
+                        />
 
                         <span class="account__arrow">
                             <fa icon="caret-down" />
@@ -120,3 +126,75 @@ const removeUser = async () => {
         </div>
     </header>
 </template>
+
+<style scoped>
+.header-wrapper {
+    background-color: var(--details-color);
+    height: 10vh;
+    box-shadow: var(--shadow-sm);
+    border-bottom: 1px solid var(--border-color);
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 10;
+
+    .header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 100%;
+
+        .header__logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--font-secondary);
+
+            button svg {
+                font-size: 2rem;
+            }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                text-decoration: none;
+                font-size: 2rem;
+            }
+        }
+    }
+}
+
+.btn.account {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.3rem 0.3rem 1rem;
+    cursor: pointer;
+    background-color: var(--bg-secondary);
+
+    .account__details {
+        text-align: right;
+
+        .text--small {
+            font-weight: 500;
+        }
+    }
+
+    @media (width <=768px) {
+        .account__details {
+            display: none;
+        }
+    }
+
+    .account__avatar {
+        border-radius: 50%;
+        border: 1px solid var(--border-color);
+    }
+
+    .account__arrow {
+        transform: translateY(-2px);
+        margin-inline: 0.5rem;
+    }
+}
+</style>

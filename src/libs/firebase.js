@@ -4,13 +4,13 @@ import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAA8sGugdiII_XCpl1esli27fVMwNCbSTk",
-    authDomain: "task-flow-85478.firebaseapp.com",
-    projectId: "task-flow-85478",
-    storageBucket: "task-flow-85478.appspot.com",
-    messagingSenderId: "338019562163",
-    appId: "1:338019562163:web:d9e3dc70416b26bf0276c6",
-    measurementId: "G-2K8X0EXWW4",
+    apiKey: "AIzaSyCCUvmSSBbrzpVDoP_hVfiuVJIZXtTEjfQ",
+    authDomain: "mentesemflash-c98ec.firebaseapp.com",
+    projectId: "mentesemflash-c98ec",
+    storageBucket: "mentesemflash-c98ec.firebasestorage.app",
+    messagingSenderId: "382344100963",
+    appId: "1:382344100963:web:9255cea2170dd7cfef8c56",
+    measurementId: "G-WHMCSVMMW2",
 };
 
 const provider = new GoogleAuthProvider();
