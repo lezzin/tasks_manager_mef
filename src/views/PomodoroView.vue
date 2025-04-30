@@ -1,13 +1,13 @@
 <script setup>
-import { useLoadingStore } from '../stores/loadingStore';
-import { useSidebarStore } from '../stores/sidebarStore';
+import { useLoadingStore } from "../stores/loadingStore";
+import { useSidebarStore } from "../stores/sidebarStore";
 
-import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
 
-import PomodoroTimer from '../components/pomodoro/PomodoroTimer.vue';
-import PomodoroInformation from '../components/pomodoro/PomodoroInformation.vue';
-import UIButton from '../components/ui/UIButton.vue';
+import PomodoroTimer from "../components/pomodoro/PomodoroTimer.vue";
+import PomodoroInformation from "../components/pomodoro/PomodoroInformation.vue";
+import UIButton from "../components/ui/UIButton.vue";
 
 const loadingStore = useLoadingStore();
 const sidebarStore = useSidebarStore();
@@ -16,9 +16,9 @@ const router = useRouter();
 const goToHelp = () => {
     window.scroll({
         top: document.querySelector("#s-help").getBoundingClientRect().top + window.scrollY,
-        behavior: "smooth"
-    })
-}
+        behavior: "smooth",
+    });
+};
 
 onMounted(() => {
     sidebarStore.setShowSidebarToggler(false);

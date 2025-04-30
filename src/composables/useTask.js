@@ -48,7 +48,7 @@ const getUserTasks = async (userId) => {
 
 const getUserTasksByTopic = async (topicId, userId) => {
     const tasks = await getUserTasks(userId);
-    return Object.values(tasks).filter(task => task.topicId === topicId)
+    return Object.values(tasks).filter((task) => task.topicId === topicId);
 };
 
 const getUserTasksWithTopic = async (userId) => {
@@ -56,10 +56,12 @@ const getUserTasksWithTopic = async (userId) => {
     const userTasks = Object.values(data);
     const { getTopicInfo } = useTopic();
 
-    await Promise.all(userTasks.map(async (task) => {
-        const { name } = await getTopicInfo(task.topicId, userId);
-        task.topicName = name;
-    }));
+    await Promise.all(
+        userTasks.map(async (task) => {
+            const { name } = await getTopicInfo(task.topicId, userId);
+            task.topicName = name;
+        })
+    );
 
     return userTasks;
 };
@@ -126,7 +128,7 @@ const changeKanbanStatus = async (taskToUpdate, newKanbanStatus, userId) => {
     const updatedTask = {
         ...taskToUpdate,
         kanbanStatus: newKanbanStatus,
-        status: (newKanbanStatus === TASK_KANBAN_STATUSES.completed),
+        status: newKanbanStatus === TASK_KANBAN_STATUSES.completed,
     };
 
     const allTasks = await getUserTasks(userId);
@@ -150,6 +152,6 @@ export const useTask = () => {
         addTask,
         editTask,
         getUserTasksByTopic,
-        getUserTasksWithTopic
+        getUserTasksWithTopic,
     };
 };

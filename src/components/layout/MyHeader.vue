@@ -151,7 +151,7 @@ const removeUser = async () => {
             color: var(--font-secondary);
 
             button svg {
-                font-size: 2rem;
+                font-size: 3rem;
             }
 
             .logo {

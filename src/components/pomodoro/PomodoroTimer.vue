@@ -1,8 +1,8 @@
 <script setup>
-import PomodoroTasks from './PomodoroTasks.vue';
-import { reactive, ref, watch } from 'vue';
-import { useToast } from '../../composables/useToast';
-import UIButton from '../ui/UIButton.vue';
+import PomodoroTasks from "./PomodoroTasks.vue";
+import { reactive, ref, watch } from "vue";
+import { useToast } from "../../composables/useToast";
+import UIButton from "../ui/UIButton.vue";
 
 const { showToast } = useToast();
 
@@ -12,7 +12,7 @@ const TIME_CONSTANTS = {
     SHORT_BREAK: { minutes: 5, seconds: 0 },
     LONG_BREAK: { minutes: 15, seconds: 0 },
     CYCLES_BEFORE_LONG_BREAK: 4,
-    PAUSE_PER_CYCLE_IN_MINUTES: 5
+    PAUSE_PER_CYCLE_IN_MINUTES: 5,
 };
 
 const timer = reactive({
@@ -21,7 +21,7 @@ const timer = reactive({
     active: false,
     paused: false,
     cycleCount: 1,
-    onBreak: false
+    onBreak: false,
 });
 let timerInterval;
 
@@ -114,36 +114,24 @@ const clearTimer = () => {
 };
 
 const formatTime = (time) => {
-    return time < 10 ? '0' + time : time;
+    return time < 10 ? "0" + time : time;
 };
 </script>
 
 <template>
     <div class="pomodoro">
-        <div class="pomodoro__cycle-info">
-            Ciclo: {{ timer.cycleCount }} | {{ timer.onBreak ? 'Intervalo' : 'Trabalho' }}
-        </div>
+        <div class="pomodoro__cycle-info">Ciclo: {{ timer.cycleCount }} | {{ timer.onBreak ? "Intervalo" : "Trabalho" }}</div>
 
-        <span class="pomodoro__timer">
-            {{ formatTime(timer.minutes) }}:{{ formatTime(timer.seconds) }}
-        </span>
+        <span class="pomodoro__timer"> {{ formatTime(timer.minutes) }}:{{ formatTime(timer.seconds) }} </span>
 
         <div class="pomodoro__buttons">
-            <UIButton variant="primary" @click="startPomodoro" v-if="!timer.active && !timer.paused">
-                <fa icon="play" /> Iniciar
-            </UIButton>
+            <UIButton variant="primary" @click="startPomodoro" v-if="!timer.active && !timer.paused"> <fa icon="play" /> Iniciar </UIButton>
 
-            <UIButton variant="warning" @click="pausePomodoro" v-if="timer.active && !timer.paused">
-                <fa icon="pause" /> Pausar
-            </UIButton>
+            <UIButton variant="warning" @click="pausePomodoro" v-if="timer.active && !timer.paused"> <fa icon="pause" /> Pausar </UIButton>
 
-            <UIButton variant="primary" @click="startPomodoro" v-if="timer.paused">
-                <fa icon="play" /> Continuar
-            </UIButton>
+            <UIButton variant="primary" @click="startPomodoro" v-if="timer.paused"> <fa icon="play" /> Continuar </UIButton>
 
-            <UIButton variant="danger" @click="stopPomodoro" v-if="timer.active">
-                <fa icon="circle-stop" /> Parar
-            </UIButton>
+            <UIButton variant="danger" @click="stopPomodoro" v-if="timer.active"> <fa icon="circle-stop" /> Parar </UIButton>
         </div>
 
         <PomodoroTasks />
@@ -178,9 +166,9 @@ const formatTime = (time) => {
     text-transform: uppercase;
     font-weight: 500;
     font-size: 1.8rem;
-    padding: .8rem 2rem;
+    padding: 0.8rem 2rem;
     margin-bottom: 5rem;
-    box-shadow: 0 .5rem 1rem rgb(0 0 0 / 15%);
+    box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%);
 }
 
 .pomodoro__cycle-info {

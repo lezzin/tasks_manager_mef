@@ -181,6 +181,55 @@ form {
     max-width: var(--form-width, 100%);
     margin: 0 auto;
 
+    .tip {
+        position: relative;
+        padding: 0.75rem 2rem 0.75rem 1rem;
+        border-radius: 0.5rem;
+        font-size: var(--fs-small);
+        line-height: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .close-icon {
+        position: absolute;
+        top: 50%;
+        right: 0.75rem;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 1.5rem;
+        color: #6b7280;
+        transition: color 0.2s ease;
+        .close-icon .tip {
+            position: relative;
+            padding: 0.75rem 2rem 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: var(--fs-small);
+            line-height: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .close-icon {
+            position: absolute;
+            top: 50%;
+            right: 0.75rem;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #6b7280;
+            transition: color 0.2s ease;
+        }
+
+        .close-icon:hover {
+            color: #374151;
+        }
+
+        &:hover {
+            color: #374151;
+        }
+    }
+
     .input-error {
         button {
             color: var(--danger-color);
