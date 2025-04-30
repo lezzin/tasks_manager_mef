@@ -28,7 +28,7 @@ const parseResponse = (response) => {
 
 const buildTaskDetails = (tasks) =>
     tasks.map(({ name, created_at, topicName, status, priority }, index) => (
-        `Tarefa ${index + 1}: ${name} 
+        `Tarefa ${index + 1}: ${name}
         Criada em: ${created_at}
         Tópico: ${topicName ?? "Não especificado"}
         Status: ${status ? "Concluída" : "Não concluída"}
@@ -36,7 +36,7 @@ const buildTaskDetails = (tasks) =>
     )).join("\n");
 
 const createPrompt = (taskDetails) => `
-Com base na lista de tarefas anteriores abaixo, sugira uma nova tarefa que seja relevante para o contexto atual. Considere o tópico, status, nome e prioridade das tarefas ao fazer a sugestão. 
+Com base na lista de tarefas anteriores abaixo, sugira uma nova tarefa que seja relevante para o contexto atual. Considere o tópico, status, nome e prioridade das tarefas ao fazer a sugestão.
 O resultado deve ser um JSON estruturado com os campos especificados, e cada campo deve conter informações detalhadas e relevantes.
 
 Responda no formato JSON com os seguintes campos:
