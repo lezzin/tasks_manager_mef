@@ -76,7 +76,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="pomodoro-tasks-wrapper">
+    <p class="text text--icon" v-if="!hasTasks">
+        <fa icon="exclamation-circle" />
+        <span> Crie uma nova tarefa para começar a utilizar o Pomodoro da melhor maneira.</span>
+    </p>
+
+    <div class="pomodoro-tasks-wrapper" v-else>
         <UIButton variant="outline-primary" @click="toggleDropdown" title="Exibir tarefas">
             <fa :icon="isDropdownOpen ? 'eye-slash' : 'eye'" />
             {{ isDropdownOpen ? "Fechar" : "Exibir" }} tarefas
@@ -99,11 +104,6 @@ onMounted(() => {
                 />
             </div>
         </Transition>
-
-        <p class="text text--icon" v-if="!hasTasks">
-            <fa icon="exclamation-circle" />
-            <span> Crie uma nova tarefa para começar a utilizar o Pomodoro da melhor maneira.</span>
-        </p>
 
         <Teleport to="#modal">
             <Transition>

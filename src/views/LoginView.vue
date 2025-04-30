@@ -1,5 +1,5 @@
 <script setup>
-import { PAGE_TITLES } from "../utils/variables.js";
+import { GOOGLE_AUTH_ERRORS, PAGE_TITLES } from "../utils/variables.js";
 
 import { ref, watchEffect, onMounted } from "vue";
 import { useRouter } from "vue-router";
@@ -10,9 +10,9 @@ import { useAuthStore } from "../stores/authStore.js";
 import { useLoadingStore } from "../stores/loadingStore.js";
 import { useSidebarStore } from "../stores/sidebarStore.js";
 
-import ImageResponsive from "../components/shared/ImageResponsive.vue";
 import UIButton from "../components/ui/UIButton.vue";
 import CreatorLink from "../components/shared/CreatorLink.vue";
+import { baseUrl } from "../utils/urlUtils.js";
 
 const { provider, auth } = defineProps(["provider", "auth"]);
 const { showToast } = useToast();
@@ -31,22 +31,7 @@ async function loginGoogle() {
         await signInWithPopup(auth, provider);
         router.push("/");
     } catch ({ code, message }) {
-        const errors = {
-            "auth/popup-closed-by-user": "O processo de autenticação foi cancelado.",
-            "auth/cancelled-popup-request": "Aguarde o processo de autenticação ser concluído.",
-            "auth/popup-blocked":
-                "O navegador bloqueou o pop-up de autenticação. Desative o bloqueador de pop-up.",
-            "auth/account-exists-with-different-credential":
-                "Essa conta já está associada a outro provedor de autenticação.",
-            "auth/operation-not-allowed": "Autenticação com este provedor não está habilitada.",
-            "auth/unauthorized-domain": "O domínio atual não está autorizado para autenticação.",
-            "auth/user-disabled": "Esse email de usuário está desativado.",
-            "auth/invalid-credential": "As credenciais fornecidas são inválidas ou expiraram.",
-            "auth/web-storage-unsupported":
-                "O navegador não é compatível com armazenamento da Web necessário para autenticação.",
-        };
-
-        showToast("danger", errors[code] ?? message);
+        showToast("danger", GOOGLE_AUTH_ERRORS[code] ?? message);
     } finally {
         loading.value = false;
     }
@@ -79,11 +64,7 @@ watchEffect(() => {
         >
             <h2 id="login-heading" class="sr-only">Formulário de Login com Google</h2>
 
-            <ImageResponsive
-                small="login_sm.png"
-                lg="login_lg.png"
-                alt="Uma pessoa escrevendo em um caderno"
-            />
+            <img :src="baseUrl('logo-login.svg')" alt="Logo do MeF" />
 
             <UIButton
                 type="submit"
@@ -94,7 +75,7 @@ watchEffect(() => {
                 aria-busy="loading"
             >
                 <img
-                    src="/src/assets/img/google-logo.png"
+                    :src="baseUrl('google-logo.png')"
                     alt="Logo do Google"
                     width="24"
                     height="24"

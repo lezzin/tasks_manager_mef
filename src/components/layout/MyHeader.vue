@@ -95,7 +95,6 @@ const removeUser = async () => {
                         height="44"
                         loading="lazy"
                     />
-                    <span>MeF</span>
                 </RouterLink>
             </div>
 

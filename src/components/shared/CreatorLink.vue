@@ -1,7 +1,8 @@
 <template>
     <p class="text text--muted text--small">
-        <span>Criado com ❤️ por </span>
-        <a href="https://lezzin.github.io/" target="_blank">Lezzin</a>
+        <span>&copy; {{ new Date().getFullYear() }}</span>
+        <a href="https://mentesemflash.com" target="_blank"> Mentes em Flash.</a>
+        <span>Todos os direitos reservados.</span>
     </p>
 </template>
 
