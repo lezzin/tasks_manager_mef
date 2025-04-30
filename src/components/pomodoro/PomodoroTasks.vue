@@ -132,6 +132,7 @@ onMounted(() => {
     gap: 0.6rem;
     max-height: 160px;
     width: 100%;
+    overflow-y: auto;
     padding-inline: var(--padding);
 }
 
