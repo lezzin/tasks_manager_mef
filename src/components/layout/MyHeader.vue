@@ -38,7 +38,8 @@ const logoutUser = async () => {
         isAccountDropdownActive.value = false;
     } catch ({ code, message }) {
         const errors = {
-            "auth/network-request-failed": "Falha na conexão de rede. Verifique sua conexão e tente novamente.",
+            "auth/network-request-failed":
+                "Falha na conexão de rede. Verifique sua conexão e tente novamente.",
             "auth/internal-error": "Erro interno do servidor. Tente novamente mais tarde.",
             "auth/no-current-user": "Nenhum usuário autenticado no momento.",
         };
@@ -61,7 +62,8 @@ const removeUser = async () => {
     } catch ({ code, message }) {
         const errors = {
             "auth/requires-recent-login": "Para excluir sua conta, faça login e tente novamente.",
-            "auth/network-request-failed": "Falha na conexão de rede. Verifique sua conexão e tente novamente.",
+            "auth/network-request-failed":
+                "Falha na conexão de rede. Verifique sua conexão e tente novamente.",
         };
 
         showToast("danger", errors[code] ?? message);
@@ -86,14 +88,29 @@ const removeUser = async () => {
                 </UIButton>
 
                 <RouterLink to="/" title="Acessar página inicial" class="logo">
-                    <img :src="baseUrl('logo.svg')" alt="TaskFlow - logo do website" width="44" height="44" loading="lazy" />
+                    <img
+                        :src="baseUrl('logo.svg')"
+                        alt="TaskFlow - logo do website"
+                        width="44"
+                        height="44"
+                        loading="lazy"
+                    />
                     <span>MeF</span>
                 </RouterLink>
             </div>
 
-            <UIDropdown :isActive="isAccountDropdownActive" @update:isActive="toggleAccountDropdown" v-if="user">
+            <UIDropdown
+                :isActive="isAccountDropdownActive"
+                @update:isActive="toggleAccountDropdown"
+                v-if="user"
+            >
                 <template #trigger="{ trigger }">
-                    <UIButton isBordered class="account" title="Abrir/fechar dropdown" @click="toggleAccountDropdown">
+                    <UIButton
+                        isBordered
+                        class="account"
+                        title="Abrir/fechar dropdown"
+                        @click="toggleAccountDropdown"
+                    >
                         <div class="account__details">
                             <p class="text text--small">Olá, {{ user.displayName }}</p>
                             <p class="text text--smallest">{{ user.email }}</p>
@@ -115,10 +132,20 @@ const removeUser = async () => {
                 </template>
 
                 <template #menu>
-                    <UIButton isDropdown variant="outline-danger" @click="logoutUser" title="Sair da minha conta">
+                    <UIButton
+                        isDropdown
+                        variant="outline-danger"
+                        @click="logoutUser"
+                        title="Sair da minha conta"
+                    >
                         <fa icon="right-from-bracket" /> Sair da conta
                     </UIButton>
-                    <UIButton isDropdown variant="danger" @click="removeUser" title="Excluir minha conta">
+                    <UIButton
+                        isDropdown
+                        variant="danger"
+                        @click="removeUser"
+                        title="Excluir minha conta"
+                    >
                         <fa icon="trash" /> Excluir conta
                     </UIButton>
                 </template>

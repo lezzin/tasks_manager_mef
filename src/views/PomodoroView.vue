@@ -18,94 +18,83 @@ const router = useRouter();
 const hasAnyTask = ref(false);
 
 const goToHelp = () => {
-  window.scroll({
-    top:
-      document.querySelector("#s-help").getBoundingClientRect().top +
-      window.scrollY,
-    behavior: "smooth",
-  });
+    window.scroll({
+        top: document.querySelector("#s-help").getBoundingClientRect().top + window.scrollY,
+        behavior: "smooth",
+    });
 };
 
 onMounted(async () => {
-  sidebarStore.setShowSidebarToggler(false);
-  loadingStore.hideLoader();
-  hasAnyTask.value = await checkUserTasks();
+    sidebarStore.setShowSidebarToggler(false);
+    loadingStore.hideLoader();
+    hasAnyTask.value = await checkUserTasks();
 });
 </script>
 
 <template>
-  <section class="pomodoro-wrapper" id="s-pomodoro">
-    <div class="container">
-      <div class="pomodoro__absolute">
-        <UIButton
-          @click="() => router.back()"
-          variant="outline-primary"
-          title="Voltar para a página anterior"
-        >
-          <fa icon="arrow-left" />
-          <span>Voltar</span>
-        </UIButton>
+    <section class="pomodoro-wrapper" id="s-pomodoro">
+        <div class="container">
+            <div class="pomodoro__absolute">
+                <UIButton
+                    @click="() => router.back()"
+                    variant="outline-primary"
+                    title="Voltar para a página anterior"
+                >
+                    <fa icon="arrow-left" />
+                    <span>Voltar</span>
+                </UIButton>
 
-        <UIButton
-          variant="outline-primary"
-          isIcon
-          title="Acessar ajuda"
-          @click="goToHelp"
-        >
-          <fa icon="circle-question" />
-        </UIButton>
-      </div>
+                <UIButton variant="outline-primary" isIcon title="Acessar ajuda" @click="goToHelp">
+                    <fa icon="circle-question" />
+                </UIButton>
+            </div>
 
-      <PomodoroTimer :hasTasks="hasAnyTask" />
-    </div>
-  </section>
+            <PomodoroTimer :hasTasks="hasAnyTask" />
+        </div>
+    </section>
 
-  <section class="information-wrapper container" id="s-help">
-    <PomodoroInformation />
-  </section>
+    <section class="information-wrapper container" id="s-help">
+        <PomodoroInformation />
+    </section>
 </template>
 
 <style scoped>
 .pomodoro-wrapper {
-  color: var(--details-color);
-  background: var(--details-color-light);
-  background: -webkit-linear-gradient(
-    to right,
-    var(--details-color-light-2),
-    var(--details-color-light)
-  );
-  background: linear-gradient(
-    to right,
-    var(--details-color-light-2),
-    var(--details-color-light)
-  );
+    color: var(--details-color);
+    background: var(--details-color-light);
+    background: -webkit-linear-gradient(
+        to right,
+        var(--details-color-light-2),
+        var(--details-color-light)
+    );
+    background: linear-gradient(to right, var(--details-color-light-2), var(--details-color-light));
 }
 
 .pomodoro-wrapper .container {
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-height: 100vh;
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
 }
 
 .pomodoro__absolute {
-  position: absolute;
-  top: 1.5rem;
-  right: var(--padding);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+    position: absolute;
+    top: 1.5rem;
+    right: var(--padding);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .pomodoro__absolute button {
-  padding: 0.74rem 1rem;
+    padding: 0.74rem 1rem;
 }
 
 .information-wrapper {
-  display: grid;
-  place-items: center;
-  max-width: 720px;
-  min-height: 90vh;
-  padding: calc(var(--padding) * 2) var(--padding);
+    display: grid;
+    place-items: center;
+    max-width: 720px;
+    min-height: 90vh;
+    padding: calc(var(--padding) * 2) var(--padding);
 }
 </style>
