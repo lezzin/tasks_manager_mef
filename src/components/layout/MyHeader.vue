@@ -13,12 +13,14 @@ import { useLoadingStore } from "../../stores/loadingStore";
 
 import UIButton from "../ui/UIButton.vue";
 import UIDropdown from "../ui/UIDropdown.vue";
+import { useConfirmModal } from "../../composables/useConfirmModal";
 
 const authStore = useAuthStore();
 const loadingStore = useLoadingStore();
 const { logout, deleteAccount } = authStore;
 const { user } = storeToRefs(authStore);
 const { showToast } = useToast();
+const { setConfirmModal } = useConfirmModal();
 
 const sidebarStore = useSidebarStore();
 
@@ -50,9 +52,11 @@ const logoutUser = async () => {
     }
 };
 
-const removeUser = async () => {
-    if (!confirm("Deseja realmente excluir esse usuário?")) return;
+const confirmRemotion = () => {
+    setConfirmModal("Deseja realmente excluir esse usuário?", async () => await removeUser());
+};
 
+const removeUser = async () => {
     loadingStore.showLoader();
 
     try {
@@ -142,7 +146,7 @@ const removeUser = async () => {
                     <UIButton
                         isDropdown
                         variant="danger"
-                        @click="removeUser"
+                        @click="confirmRemotion"
                         title="Excluir minha conta"
                     >
                         <fa icon="trash" /> Excluir conta

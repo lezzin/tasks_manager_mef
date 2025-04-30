@@ -11,7 +11,7 @@ import { useToast } from "../../composables/useToast";
 import { useModal } from "../../composables/useModal";
 import { useTask } from "../../composables/useTask";
 
-import CommentModal from "../task/CommentModal.vue";
+import CommentModal from "../task/.vue";
 import UIButton from "../ui/UIButton.vue";
 import Task from "../task/TaskItem.vue";
 
