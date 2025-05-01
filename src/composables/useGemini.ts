@@ -1,22 +1,24 @@
-import { AI_USAGE_DOC_NAME } from "../utils/variables";
+import { AI_USAGE_DOC_NAME } from "../utils/variables.ts";
 import { getPriorityText } from "../utils/priorityUtils";
 import { db } from "../libs/firebase";
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
+import type { SuggestionResponse } from "@/interfaces/SuggestionResponse";
+import type { Task } from "@/interfaces/Task";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const USAGE_LIMIT = 10;
 
-const sanitizeJSON = (response) => {
+const sanitizeJSON = (response: string): string => {
     const jsonStart = response.indexOf("{");
     const jsonEnd = response.lastIndexOf("}");
     return jsonStart >= 0 && jsonEnd >= 0 ? response.slice(jsonStart, jsonEnd + 1) : response;
 };
 
-const parseResponse = (response) => {
+const parseResponse = (response: string): SuggestionResponse => {
     try {
         const sanitizedResponse = JSON.parse(sanitizeJSON(response.replace(/```json|```/g, "")));
         return sanitizedResponse;
@@ -26,7 +28,7 @@ const parseResponse = (response) => {
     }
 };
 
-const buildTaskDetails = (tasks) =>
+const buildTaskDetails = (tasks: Task[]): string =>
     tasks
         .map(
             ({ name, created_at, topicName, status, priority }, index) =>
@@ -38,7 +40,7 @@ const buildTaskDetails = (tasks) =>
         )
         .join("\n");
 
-const createPrompt = (taskDetails) => `
+const createPrompt = (taskDetails: string): string => `
 Com base na lista de tarefas anteriores abaixo, sugira uma nova tarefa que seja relevante para o contexto atual. Considere o tópico, status, nome e prioridade das tarefas ao fazer a sugestão.
 O resultado deve ser um JSON estruturado com os campos especificados, e cada campo deve conter informações detalhadas e relevantes.
 
@@ -59,17 +61,18 @@ Exemplo de resposta JSON:
 Abaixo está a lista das tarefas anteriores para contexto:
 ${taskDetails}`;
 
-const getUsageCount = async (uid) => {
+const getUsageCount = async (uid: string): Promise<number> => {
     const userDocRef = doc(db, AI_USAGE_DOC_NAME, uid);
     const userDoc = await getDoc(userDocRef);
 
+    const today = new Date().toISOString().split("T")[0];
+
     if (!userDoc.exists()) {
-        await setDoc(userDocRef, { count: 0, lastUsed: new Date().toISOString().split("T")[0] });
+        await setDoc(userDocRef, { count: 0, lastUsed: today });
         return USAGE_LIMIT;
     }
 
-    const { count, lastUsed } = userDoc.data();
-    const today = new Date().toISOString().split("T")[0];
+    const { count, lastUsed } = userDoc.data() as { count: number; lastUsed: string };
 
     if (lastUsed !== today) {
         await setDoc(userDocRef, { count: 0, lastUsed: today });
@@ -79,14 +82,14 @@ const getUsageCount = async (uid) => {
     return USAGE_LIMIT - count;
 };
 
-const checkUsageLimit = async (uid) => {
+const checkUsageLimit = async (uid: string): Promise<void> => {
     const remaining = await getUsageCount(uid);
     if (remaining <= 0) throw new Error("Limite de uso atingido.");
 
     await updateDoc(doc(db, AI_USAGE_DOC_NAME, uid), { count: increment(1) });
 };
 
-const suggestTask = async (tasks, userId) => {
+const suggestTask = async (tasks: Task[], userId: string): Promise<SuggestionResponse> => {
     if (tasks.length < 2) {
         return { error: "Insira ao menos 2 tarefas." };
     }
@@ -105,7 +108,7 @@ const suggestTask = async (tasks, userId) => {
         }
 
         return parsedResponse;
-    } catch (error) {
+    } catch (error: any) {
         return { error: error.message };
     }
 };

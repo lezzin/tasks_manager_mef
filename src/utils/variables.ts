@@ -8,7 +8,7 @@ const PAGE_TITLES = {
     not_found: `${PROJECT_TITLE} | Página não encontrada`,
     home: {
         default: `${PROJECT_TITLE} | Suas tarefas`,
-        topic: (topicName) => `${PROJECT_TITLE} | ${topicName}`,
+        topic: (topicName: string) => `${PROJECT_TITLE} | ${topicName}`,
     },
     general: `${PROJECT_TITLE} | Visão geral`,
     kanban: `${PROJECT_TITLE} | Kanban`,

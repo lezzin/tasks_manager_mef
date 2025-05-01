@@ -1,15 +1,16 @@
-<script setup>
+<script setup lang="ts">
 import { useToast } from "../../composables/useToast";
 import { useTask } from "../../composables/useTask";
 import { useAuthStore } from "../../stores/authStore";
 import { useModal } from "../../composables/useModal";
 
 import { marked } from "marked";
-import { inject, markRaw, ref } from "vue";
+import { inject, markRaw, ref, type PropType } from "vue";
 
 import TaskFormEdit from "../forms/TaskFormEdit.vue";
 import CommentModal from "./CommentModal.vue";
 import TaskItem from "./TaskItem.vue";
+import type { Task } from "@/interfaces/Task";
 
 const { user } = useAuthStore();
 const { changeStatus, deleteTask } = useTask();
@@ -22,18 +23,20 @@ const props = defineProps({
         required: true,
     },
     tasks: {
-        type: Object,
+        type: Object as PropType<Task[]>,
         required: true,
     },
 });
 
-const editingTask = ref(null);
-const selectedComment = ref(null);
+const editingTask = ref<null | Task>(null);
+const selectedComment = ref("");
 
-const filterTask = inject("filterTask");
-const searchTask = inject("searchTask");
+const filterTask = inject("filterTask") as any;
+const searchTask = inject("searchTask") as any;
 
-const handleChangeTaskStatus = async (taskToUpdate) => {
+const handleChangeTaskStatus = async (taskToUpdate: Task) => {
+    if (!user?.uid) return;
+
     try {
         await changeStatus(taskToUpdate, user.uid);
         showToast("success", "Status de conclusão alterado com sucesso.");
@@ -44,7 +47,9 @@ const handleChangeTaskStatus = async (taskToUpdate) => {
     }
 };
 
-const handleDeleteTask = async (taskToDelete) => {
+const handleDeleteTask = async (taskToDelete: Task) => {
+    if (!user?.uid) return;
+
     if (!confirm("Tem certeza que deseja excluir essa tarefa? Essa ação não poderá ser desfeita!"))
         return;
 
@@ -56,15 +61,15 @@ const handleDeleteTask = async (taskToDelete) => {
     }
 };
 
-const openEditTaskModal = (task) => {
+const openEditTaskModal = (task: Task) => {
     editingTask.value = task;
-    modal.component.value = markRaw(TaskFormEdit);
+    modal.component.value = markRaw(TaskFormEdit) as any;
     modal.showModal();
 };
 
-const openTaskComment = (comment) => {
-    selectedComment.value = marked(comment);
-    modal.component.value = markRaw(CommentModal);
+const openTaskComment = async (comment: string) => {
+    selectedComment.value = await marked(comment);
+    modal.component.value = markRaw(CommentModal) as any;
     modal.showModal();
 };
 </script>

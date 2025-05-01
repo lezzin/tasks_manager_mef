@@ -1,5 +1,5 @@
 import { reactive } from "vue";
-import { TOAST_TIMEOUT } from "../utils/variables";
+import { TOAST_TIMEOUT } from "../utils/variables.ts";
 
 const toast = reactive({
     show: false,
@@ -7,9 +7,9 @@ const toast = reactive({
     text: "",
 });
 
-let timeout;
+let timeout: number;
 
-function showToast(type = "success", message) {
+function showToast(type = "success", message: string) {
     toast.type = type;
     toast.text = message;
     toast.show = true;

@@ -1,29 +1,39 @@
-<script setup>
-import { PAGE_TITLES, TASK_KANBAN_STATUSES } from "../utils/variables.js";
-import { getPriorityClass, getPriorityText, getPriorityIcon } from "../utils/priorityUtils.js";
+<script setup lang="ts">
+import { PAGE_TITLES, TASK_KANBAN_STATUSES } from "../utils/variables.ts";
+import { getPriorityClass, getPriorityText, getPriorityIcon } from "../utils/priorityUtils.ts";
 
 import { ref, reactive, onMounted } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 
-import { useToast } from "../composables/useToast.js";
-import { useTask } from "../composables/useTask.js";
-import { useAuthStore } from "../stores/authStore.js";
-import { useLoadingStore } from "../stores/loadingStore.js";
-import { useSidebarStore } from "../stores/sidebarStore.js";
+import { useToast } from "../composables/useToast.ts";
+import { useTask } from "../composables/useTask.ts";
+import { useAuthStore } from "../stores/authStore.ts";
+import { useLoadingStore } from "../stores/loadingStore.ts";
+import { useSidebarStore } from "../stores/sidebarStore.ts";
 
 import ImageResponsive from "../components/shared/ImageResponsive.vue";
 import UIButton from "../components/ui/UIButton.vue";
+import type { Task } from "@/interfaces/Task.ts";
 
-const props = defineProps(["db"]);
+// Define Props type with explicit typing
+const props = defineProps<{
+    db?: Firestore; // Add specific Firestore type here
+}>();
 
-const tasks = reactive({
+// Define reactive state for tasks
+const tasks = reactive<{
+    todo: Task[];
+    doing: Task[];
+    completed: Task[];
+}>({
     todo: [],
     doing: [],
     completed: [],
 });
-const draggedTask = ref(null);
-const activeColumn = ref(null);
-const tasksLength = ref(0);
+
+const draggedTask = ref<Task | null>(null); // Task type or null
+const activeColumn = ref<string | null>(null); // Column as string or null
+const tasksLength = ref<number>(0); // Number of tasks
 
 const { showToast } = useToast();
 const { getUserTasksWithTopic, changeKanbanStatus } = useTask();
@@ -32,7 +42,10 @@ const loadingStore = useLoadingStore();
 const sidebarStore = useSidebarStore();
 const router = useRouter();
 
+// Fetch tasks based on user ID
 const loadTasks = async () => {
+    if (!user?.uid) return;
+
     loadingStore.showLoader();
 
     try {
@@ -46,27 +59,32 @@ const loadTasks = async () => {
     }
 };
 
-const organizeTasksByStatus = (userTasks) => {
+// Organize tasks into columns based on status
+const organizeTasksByStatus = (userTasks: Task[]) => {
     tasks.todo = userTasks.filter(
         (task) => task.kanbanStatus === TASK_KANBAN_STATUSES.todo || !task.kanbanStatus
     );
+
     tasks.doing = userTasks.filter((task) => task.kanbanStatus === TASK_KANBAN_STATUSES.doing);
+
     tasks.completed = userTasks.filter(
         (task) => task.kanbanStatus === TASK_KANBAN_STATUSES.completed
     );
 };
 
-const handleDragEvents = (event, action, task = null) => {
+// Handle drag events on tasks
+const handleDragEvents = (event: DragEvent, action: string, task: Task | null = null) => {
     if (action === "start") {
         draggedTask.value = task;
-        event.target.classList.add("dragging");
+        event?.target?.classList?.add("dragging");
     } else if (action === "end") {
-        event.target.classList.remove("dragging");
+        event?.target?.classList?.remove("dragging");
         draggedTask.value = null;
     }
 };
 
-const onDrop = (column) => {
+// Drop task into a new column
+const onDrop = (column: string) => {
     if (draggedTask.value && draggedTask.value.kanbanStatus !== column) {
         changeTaskColumn(draggedTask.value, column);
     }
@@ -74,25 +92,29 @@ const onDrop = (column) => {
     activeColumn.value = null;
 };
 
-const onDragEnter = (event, kanbanStatus) => {
+// Handle drag enter event to highlight the active column
+const onDragEnter = (event: DragEvent, kanbanStatus: string) => {
     if (activeColumn.value !== kanbanStatus) {
         activeColumn.value = kanbanStatus;
     }
     event.preventDefault();
 };
 
-const onDragOver = (event) => {
+// Handle drag over event
+const onDragOver = (event: DragEvent) => {
     event.preventDefault();
 };
 
-const moveTask = (task, direction) => {
+// Move task between columns
+const moveTask = (task: Task, direction: "prev" | "next") => {
     const newColumn = getNewColumn(task.kanbanStatus, direction);
     if (newColumn) {
         changeTaskColumn(task, newColumn);
     }
 };
 
-const getNewColumn = (currentColumn, direction) => {
+// Determine the new column based on current column and direction
+const getNewColumn = (currentColumn: string, direction: "prev" | "next"): string | null => {
     const columns = ["todo", "doing", "completed"];
     const currentIndex = columns.indexOf(currentColumn);
     return direction === "prev" && currentIndex > 0
@@ -102,15 +124,15 @@ const getNewColumn = (currentColumn, direction) => {
         : null;
 };
 
-const isFirstColumn = (kanbanStatus) => {
+const isFirstColumn = (kanbanStatus: string) => {
     return kanbanStatus === "todo";
 };
 
-const isLastColumn = (kanbanStatus) => {
+const isLastColumn = (kanbanStatus: string) => {
     return kanbanStatus === "completed";
 };
 
-const changeTaskColumn = (task, newColumn) => {
+const changeTaskColumn = (task: Task, newColumn: string) => {
     task.kanbanStatus = newColumn;
     tasks.todo = tasks.todo.filter((t) => t !== task);
     tasks.doing = tasks.doing.filter((t) => t !== task);
@@ -119,7 +141,7 @@ const changeTaskColumn = (task, newColumn) => {
     updateTaskStatus(task, newColumn);
 };
 
-const updateTaskStatus = async (taskToUpdate, newKanbanStatus) => {
+const updateTaskStatus = async (taskToUpdate: Task, newKanbanStatus: string) => {
     try {
         changeKanbanStatus(taskToUpdate, newKanbanStatus, user.uid);
         taskToUpdate.kanban = newKanbanStatus;
@@ -129,8 +151,8 @@ const updateTaskStatus = async (taskToUpdate, newKanbanStatus) => {
     }
 };
 
-const getStatusLabel = (status) => {
-    const statuses = {
+const getStatusLabel = (status: string) => {
+    const statuses: Record<string, string> = {
         todo: "Para fazer",
         doing: "Em andamento",
         completed: "Concluído",

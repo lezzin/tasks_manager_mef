@@ -1,7 +1,7 @@
-<script setup>
-import { TASK_PRIORITIES } from "../../utils/variables";
+<script setup lang="ts">
+import { TASK_PRIORITIES } from "../../utils/variables.ts";
 
-import { ref, watch } from "vue";
+import { ref, watch, type PropType } from "vue";
 
 import { useToast } from "../../composables/useToast";
 import { useAuthStore } from "../../stores/authStore";
@@ -11,6 +11,7 @@ import MarkdownEditor from "../utilities/MarkdownEditor.vue";
 import { useTask } from "../../composables/useTask";
 import UIButton from "../ui/UIButton.vue";
 import UIModal from "../ui/UIModal.vue";
+import type { Task } from "@/interfaces/Task.ts";
 
 const emit = defineEmits(["close"]);
 
@@ -20,7 +21,7 @@ const props = defineProps({
         required: false,
     },
     task: {
-        type: Object,
+        type: Object as PropType<Task>,
         required: false,
     },
 });
@@ -29,32 +30,37 @@ const { user } = useAuthStore();
 const { editTask } = useTask();
 const { showToast } = useToast();
 
-const taskName = ref("");
-const taskNameError = ref("");
-const taskPriority = ref(TASK_PRIORITIES.low);
-const taskDate = ref(null);
-const taskDateError = ref(null);
-const taskComment = ref("");
+const taskName = ref<string>("");
+const taskNameError = ref<string>("");
+const taskPriority = ref<string>(TASK_PRIORITIES.low);
+const taskDate = ref<string>("");
+const taskDateError = ref<string>("");
+const taskComment = ref<string>("");
 
 const setTaskData = () => {
-    taskName.value = props.task?.name || "";
-    taskPriority.value = props.task?.priority || TASK_PRIORITIES.low;
-    taskDate.value = props.task?.delivery_date || null;
-    taskComment.value = props.task?.comment || "";
+    if (!props.task) return;
+    const { name, priority, delivery_date, comment } = props.task;
+
+    taskName.value = name || "";
+    taskPriority.value = priority || TASK_PRIORITIES.low;
+    taskDate.value = delivery_date || "";
+    taskComment.value = comment || "";
 };
 
 watch(() => props.task, setTaskData, { immediate: true });
 
-const updateTaskName = (value) => {
+const updateTaskName = (value: string) => {
     taskName.value = value;
     taskNameError.value = "";
 };
 
-const updateTaskComment = (value) => {
+const updateTaskComment = (value: string) => {
     taskComment.value = value;
 };
 
 const handleEditTask = async () => {
+    if (!props?.task || !user?.uid) return;
+
     try {
         await editTask(
             props.task,
@@ -67,14 +73,17 @@ const handleEditTask = async () => {
         showToast("success", "Tarefa alterada com sucesso.");
         closeEditTaskModal();
     } catch (error) {
-        const errors = {
-            "empty-name": () => (taskNameError.value = error.message),
-            "invalid-date": () => (taskDateError.value = error.message),
+        const err = error as Error & { code?: string };
+
+        const errors: Record<string, () => void> = {
+            "empty-name": () => (taskNameError.value = err.message),
+            "invalid-date": () => (taskDateError.value = err.message),
         };
 
-        errors[error.code]
-            ? errors[error.code]()
-            : showToast("danger", "Erro desconhecido. Tente novamente mais tarde.");
+        (
+            errors[err.code ?? ""] ||
+            (() => showToast("danger", "Erro desconhecido. Tente novamente mais tarde."))
+        )();
     }
 };
 
@@ -82,7 +91,7 @@ const closeEditTaskModal = () => {
     taskName.value = "";
     taskNameError.value = "";
     taskPriority.value = TASK_PRIORITIES.low;
-    taskDate.value = null;
+    taskDate.value = "";
     taskComment.value = "";
     emit("close");
 };

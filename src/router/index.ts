@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { onAuthStateChanged } from "firebase/auth";
-import { db, auth, provider } from "../libs/firebase.js";
+import { db, auth, provider } from "../libs/firebase";
 
 const getCurrentUser = () => {
     return new Promise((resolve, reject) => {

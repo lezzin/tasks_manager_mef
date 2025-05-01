@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch, watchEffect } from "vue";
 
 import { useToast } from "../../composables/useToast";
@@ -20,13 +20,17 @@ const { addTopic } = useTopic();
 const { showToast } = useToast();
 
 const handleAddTopic = async () => {
+    if (!user?.uid) return;
+
     try {
         await addTopic(name.value, user.uid);
         showToast("success", "Tópico criado com sucesso.");
         name.value = "";
     } catch (error) {
-        if (error.code == "name") {
-            nameError.value = error.message;
+        const err = error as Error & { code?: string };
+
+        if (err.code == "name") {
+            nameError.value = err.message;
             return;
         }
 

@@ -1,0 +1,20 @@
+{
+    "extends": "@vue/tsconfig/tsconfig.json",
+    "include": ["src/**/*", "env.d.ts", "vite-env.d.ts"],
+    "exclude": ["node_modules"],
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "esnext",
+        "strict": true,
+        "jsx": "preserve",
+        "moduleResolution": "node",
+
+        "types": ["vite/client"],
+        "allowJs": true,
+        "checkJs": false,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"]
+        }
+    }
+}

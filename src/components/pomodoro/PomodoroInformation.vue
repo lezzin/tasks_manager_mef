@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import UIButton from "../ui/UIButton.vue";
 
 const goToPomodoro = () => {

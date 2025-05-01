@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import UIModal from "../ui/UIModal.vue";
 import UIButton from "../ui/UIButton.vue";
 
@@ -24,10 +24,15 @@ const handleCallback = () => {
 
             <template #body>
                 <p class="text">{{ message }}</p>
+            </template>
 
+            <template #footer>
                 <div class="btn-group">
-                    <UIButton variant="primary" @click="handleCallback">Confirmar</UIButton>
-                    <UIButton variant="danger" @click="closeShowingModal">Cancelar</UIButton>
+                    <UIButton variant="outline-danger" @click="closeShowingModal">
+                        Cancelar
+                    </UIButton>
+
+                    <UIButton variant="primary" @click="handleCallback"> Confirmar </UIButton>
                 </div>
             </template>
         </UIModal>
@@ -36,12 +41,12 @@ const handleCallback = () => {
 
 <style scoped>
 .text {
-    margin-block: 2rem;
+    margin-block: 1rem;
 }
 
 .btn-group {
     display: flex;
-    margin-top: 1rem;
+    justify-content: flex-end;
     gap: 1rem;
 }
 </style>

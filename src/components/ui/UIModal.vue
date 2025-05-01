@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import UIButton from "./UIButton.vue";
 
 const emit = defineEmits(["close"]);
@@ -34,6 +34,10 @@ const closeModal = () => emit("close");
 
                 <div class="modal__body">
                     <slot name="body"></slot>
+                </div>
+
+                <div class="modal__footer" v-if="$slots.footer">
+                    <slot name="footer"></slot>
                 </div>
             </div>
         </aside>
@@ -80,5 +84,11 @@ const closeModal = () => emit("close");
     width: 100%;
     overflow-y: auto;
     padding: var(--padding);
+}
+
+.modal__footer {
+    width: 100%;
+    padding: var(--padding);
+    border-top: 1px solid var(--border-color);
 }
 </style>

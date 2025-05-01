@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useLoadingStore } from "../stores/loadingStore";
 import { useSidebarStore } from "../stores/sidebarStore";
 import { useTask } from "../composables/useTask";
@@ -19,7 +19,7 @@ const hasAnyTask = ref(false);
 
 const goToHelp = () => {
     window.scroll({
-        top: document.querySelector("#s-help").getBoundingClientRect().top + window.scrollY,
+        top: document.querySelector("#s-help" as any).getBoundingClientRect().top + window.scrollY,
         behavior: "smooth",
     });
 };

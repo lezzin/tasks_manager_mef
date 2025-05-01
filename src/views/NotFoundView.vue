@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted } from "vue";
-import { useLoadingStore } from "../stores/loadingStore.js";
+import { useLoadingStore } from "../stores/loadingStore.ts";
 import ImageResponsive from "../components/shared/ImageResponsive.vue";
-import { useAuthStore } from "../stores/authStore.js";
-import { useSidebarStore } from "../stores/sidebarStore.js";
+import { useAuthStore } from "../stores/authStore.ts";
+import { useSidebarStore } from "../stores/sidebarStore.ts";
 
 const loadingStore = useLoadingStore();
 const sidebarStore = useSidebarStore();

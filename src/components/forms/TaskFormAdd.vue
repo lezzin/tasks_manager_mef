@@ -1,5 +1,5 @@
-<script setup>
-import { TASK_PRIORITIES } from "../../utils/variables";
+<script setup lang="ts">
+import { TASK_PRIORITIES } from "../../utils/variables.ts";
 
 import { computed, inject, onMounted, reactive, ref, watch } from "vue";
 
@@ -13,9 +13,15 @@ import InputRecognition from "../utilities/InputRecognition.vue";
 import MarkdownEditor from "../utilities/MarkdownEditor.vue";
 import UIDropdown from "../ui/UIDropdown.vue";
 import UIModal from "../ui/UIModal.vue";
+import type { TaskAddInterface } from "@/interfaces/Task.ts";
+import type { SuggestionResponse } from "@/interfaces/SuggestionResponse.ts";
 
 const props = defineProps({
     topicId: {
+        type: String,
+        default: "",
+    },
+    topicName: {
         type: String,
         default: "",
     },
@@ -28,22 +34,26 @@ const { suggestTask, getUsageCount } = useGemini();
 const { showToast } = useToast();
 const { addTask, getUserTasksByTopic } = useTask();
 
-const filterTask = inject("filterTask");
-const searchTask = inject("searchTask");
+const filterTask = inject("filterTask") as any;
+const searchTask = inject("searchTask") as any;
 
-const geminiSuggestedTask = reactive({
+const geminiSuggestedTask = reactive<{
+    data: null | SuggestionResponse;
+    usageRemaining: number | null;
+}>({
     data: null,
     usageRemaining: null,
 });
 const isGeminiDropdownActive = ref(false);
 const isRequestingGemini = ref(false);
 
-const taskName = ref("");
-const taskNameError = ref("");
+const taskName = ref<string>("");
+const taskNameError = ref<string>("");
+
 const taskPriority = ref(TASK_PRIORITIES.low);
-const taskDate = ref("");
-const taskDateError = ref("");
-const taskComment = ref("");
+const taskDate = ref<string>("");
+const taskDateError = ref<string>("");
+const taskComment = ref<string>("");
 
 const closeAddingTask = () => {
     taskName.value = "";
@@ -52,38 +62,47 @@ const closeAddingTask = () => {
     taskPriority.value = TASK_PRIORITIES.low;
     filterTask.value = "all";
     searchTask.value = "";
+
     emit("close");
 };
 
-const updateTaskName = (value) => {
+const updateTaskName = (value: string) => {
     taskName.value = value;
     taskNameError.value = "";
 };
 
-const updateTaskComment = (value) => {
+const updateTaskComment = (value: string) => {
     taskComment.value = value;
 };
 
 const handleAddTask = async () => {
+    if (!user?.uid) return;
+
     try {
-        await addTask(
-            props.topicId,
-            taskName.value,
-            taskComment.value,
-            taskPriority.value,
-            taskDate.value,
-            user.uid
-        );
+        const options: TaskAddInterface = {
+            topicId: props.topicId,
+            topicName: props.topicName,
+            name: taskName.value,
+            comment: taskComment.value,
+            priority: taskPriority.value,
+            delivery_date: taskDate.value,
+        };
+
+        await addTask(options, user.uid);
         closeAddingTask();
         showToast("success", "Tarefa adicionada com sucesso.");
     } catch (error) {
-        const errors = {
-            "empty-name": () => (taskNameError.value = error.message),
-            "invalid-date": () => (taskDateError.value = error.message),
+        const err = error as Error & { code?: string };
+
+        const errors: Record<string, () => void> = {
+            "empty-name": () => (taskNameError.value = err.message),
+            "invalid-date": () => (taskDateError.value = err.message),
         };
-        errors[error.code]
-            ? errors[error.code]()
-            : showToast("danger", "Erro desconhecido. Tente novamente mais tarde.");
+
+        (
+            errors[err.code ?? ""] ||
+            (() => showToast("danger", "Erro desconhecido. Tente novamente mais tarde."))
+        )();
     }
 };
 
@@ -95,6 +114,8 @@ const requestSuggestion = async () => {
     isRequestingGemini.value = true;
     taskNameError.value = "";
 
+    if (!user?.uid) return;
+
     try {
         const selectedTopicTasks = await getUserTasksByTopic(props.topicId, user.uid);
         const suggestionResponse = await suggestTask(selectedTopicTasks, user.uid);
@@ -104,10 +125,13 @@ const requestSuggestion = async () => {
             return;
         }
 
+        if (!user?.uid) return;
+
         geminiSuggestedTask.usageRemaining = await getUsageCount(user.uid);
         geminiSuggestedTask.data = suggestionResponse;
-        taskName.value = geminiSuggestedTask.data.task;
-        taskComment.value = geminiSuggestedTask.data.details;
+
+        taskName.value = geminiSuggestedTask.data.task ?? "";
+        taskComment.value = geminiSuggestedTask.data.details ?? "";
     } catch (error) {
         console.error(error);
         showToast("danger", `Erro ao obter sugestão de tarefa.`);
@@ -116,11 +140,13 @@ const requestSuggestion = async () => {
     }
 };
 
-const addSubtaskToTaskName = (subtask) => {
+const addSubtaskToTaskName = (subtask: string) => {
     taskName.value = subtask;
 };
 
 const buttonHtml = computed(() => {
+    if (!geminiSuggestedTask.usageRemaining) return 0;
+
     const usageCount =
         geminiSuggestedTask.usageRemaining > 0
             ? `${geminiSuggestedTask.usageRemaining} restantes`
@@ -130,6 +156,7 @@ const buttonHtml = computed(() => {
 });
 
 onMounted(async () => {
+    if (!user?.uid) return;
     geminiSuggestedTask.usageRemaining = await getUsageCount(user.uid);
 });
 
@@ -215,7 +242,10 @@ watch(taskDate, () => (taskDateError.value = ""));
                                 </div>
 
                                 <div
-                                    v-if="geminiSuggestedTask.data?.subtasks?.length > 0"
+                                    v-if="
+                                        geminiSuggestedTask?.data.subtasks &&
+                                        geminiSuggestedTask?.data?.subtasks?.length > 0
+                                    "
                                     class="feedback"
                                 >
                                     <h4>Subtarefas sugeridas:</h4>

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { RouterView } from "vue-router";
 
 import { useToast } from "./composables/useToast";
@@ -26,10 +26,14 @@ const { modalData, hideConfirmModal } = useConfirmModal();
         <ToastFeedback :data="toast" @close="closeToast" />
     </Teleport>
 
-    <ConfirmModal
-        @close="hideConfirmModal"
-        @callback="modalData.callback"
-        :message="modalData.message"
-        v-if="modalData.show"
-    />
+    <Teleport to="#modal">
+        <Transition>
+            <ConfirmModal
+                v-if="modalData.show"
+                :message="modalData.message"
+                @close="hideConfirmModal"
+                @callback="modalData.callback"
+            />
+        </Transition>
+    </Teleport>
 </template>

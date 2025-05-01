@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from "vue";
 
 import { useToast } from "../../composables/useToast";
@@ -19,27 +19,31 @@ const props = defineProps({
     },
 });
 
-const oldName = ref(null);
-const name = ref("");
-const nameError = ref("");
+const oldName = ref<string>("");
+const name = ref<string>("");
+const nameError = ref<string>("");
 
 const setTopicData = () => {
-    oldName.value = props.topic;
-    name.value = props.topic;
+    oldName.value = props.topic ?? "";
+    name.value = props.topic ?? "";
 };
 
 const handleEditTopic = async () => {
+    if (!user?.uid) return;
+
     try {
         await editTopic(name.value, oldName.value, user.uid);
         showToast("success", "Tópico atualizado com sucesso.");
         closeEditTopicModal();
     } catch (error) {
-        if (error.code == "name") {
-            nameError.value = error.message;
+        const err = error as Error & { code?: string };
+
+        if (err.code == "name") {
+            nameError.value = err.message;
             return;
         }
 
-        if (error.code == "same-name") {
+        if (err.code == "same-name") {
             closeEditTopicModal();
             return;
         }

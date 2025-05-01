@@ -1,8 +1,8 @@
-<script setup>
-import { PRINCIPAL_DOC_NAME, PAGE_TITLES, TASK_PRIORITIES } from "../utils/variables";
+<script setup lang="ts">
+import { PRINCIPAL_DOC_NAME, PAGE_TITLES, TASK_PRIORITIES } from "../utils/variables.ts";
 
-import { onMounted, provide, reactive, ref, computed, watch, markRaw } from "vue";
-import { doc, onSnapshot } from "firebase/firestore";
+import { onMounted, provide, reactive, ref, computed, watch, markRaw, type PropType } from "vue";
+import { doc, Firestore, onSnapshot } from "firebase/firestore";
 import { useRoute, useRouter } from "vue-router";
 
 import { useAuthStore } from "../stores/authStore";
@@ -18,17 +18,19 @@ import TopicFormAdd from "../components/forms/TopicFormAdd.vue";
 import TopicNavigation from "../components/topic/TopicNavigation.vue";
 import ImageResponsive from "../components/shared/ImageResponsive.vue";
 import UIButton from "../components/ui/UIButton.vue";
+import type { Task } from "@/interfaces/Task.ts";
+import type { Topic } from "@/interfaces/Topic.ts";
 
 const props = defineProps({
     db: {
-        type: Object,
+        type: Object as PropType<Firestore>,
         required: false,
     },
 });
 
-const selectedTopic = ref(null);
 const aside = ref(null);
-const defaultTasks = ref([]);
+const selectedTopic = ref<Topic | null>(null);
+const defaultTasks = ref<Task[]>([]);
 
 const modal = useModal();
 const { showToast } = useToast();
@@ -37,7 +39,7 @@ const { user } = useAuthStore();
 const loadingStore = useLoadingStore();
 const sidebarStore = useSidebarStore();
 
-const topics = reactive({ data: [] });
+const topics = reactive<{ data: Topic[] | null }>({ data: [] });
 const route = useRoute();
 const router = useRouter();
 
@@ -76,24 +78,26 @@ watch(filterTask, (newValue) => {
     }
 });
 
-const loadTopicTasks = (topicId) => {
-    const docRef = doc(props.db, PRINCIPAL_DOC_NAME, user.uid);
+const loadTopicTasks = (topicId: string) => {
+    if (!user?.uid) return;
+
+    const docRef = doc(props.db as Firestore, PRINCIPAL_DOC_NAME, user.uid);
 
     onSnapshot(docRef, (doc) => {
         const userData = doc.data();
+
         if (!userData || !userData.topics || !userData.tasks) {
             defaultTasks.value = [];
             return;
         }
 
-        defaultTasks.value = Object.values(userData.tasks).filter(
-            (task) => task.topicId === topicId
-        );
+        const tasks = userData.tasks as Task[];
+        defaultTasks.value = Object.values(tasks).filter((task) => task.topicId === topicId);
     });
 };
 
-const loadTopic = async (id) => {
-    if (!id) {
+const loadTopic = async (id: string) => {
+    if (!id || !user?.uid) {
         document.title = PAGE_TITLES.home.default;
         return;
     }
@@ -101,17 +105,19 @@ const loadTopic = async (id) => {
     const topic = await getTopicInfo(id, user.uid);
 
     if (!topic) {
-        if (router.currentRoute !== "/") router.push("/");
+        if ((router.currentRoute as any) !== "/") router.push("/");
         return;
     }
 
-    selectedTopic.value = topic;
     loadTopicTasks(topic.id);
+    selectedTopic.value = topic as any;
     document.title = PAGE_TITLES.home.topic(topic.name);
 };
 
 const loadTopics = () => {
-    const docRef = doc(props.db, PRINCIPAL_DOC_NAME, user.uid);
+    if (!user?.uid) return;
+
+    const docRef = doc(props.db as Firestore, PRINCIPAL_DOC_NAME, user.uid);
     loadingStore.showLoader();
 
     onSnapshot(
@@ -127,11 +133,12 @@ const loadTopics = () => {
                 return;
             }
 
-            topics.data = Object.values(userData.topics)
+            topics.data = Object.values(userData.topics as Topic[])
                 .map((topic) => {
+                    const tasks = userData.tasks as Task[];
+
                     const tasksLength = userData.tasks
-                        ? Object.values(userData.tasks).filter((task) => task.topicId === topic.id)
-                              .length
+                        ? Object.values(tasks).filter((task) => task.topicId === topic.id).length
                         : 0;
 
                     return {
@@ -141,17 +148,20 @@ const loadTopics = () => {
                         tasks_length: tasksLength,
                     };
                 })
-                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                .sort(
+                    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                );
 
             if (!route.params.id) {
                 document.title = PAGE_TITLES.home.default;
                 return;
             }
 
-            loadTopic(route.params.id);
+            const pageId = String(route.params.id);
+            loadTopic(pageId);
         },
         (error) => {
-            if (!user.value) return;
+            if (!user?.uid) return;
             showToast("danger", "Erro ao obter tópicos. Tente novamente mais tarde.");
         }
     );
@@ -160,7 +170,7 @@ const loadTopics = () => {
 };
 
 const openAddTaskModal = () => {
-    modal.component.value = markRaw(TaskFormAdd);
+    modal.component.value = markRaw(TaskFormAdd) as any;
     modal.showModal();
 };
 
@@ -172,7 +182,7 @@ onMounted(() => {
 watch(
     () => route.params.id,
     (newId) => {
-        loadTopic(newId);
+        if (newId) loadTopic(String(newId));
     }
 );
 
@@ -211,7 +221,6 @@ provide("selectedTopic", selectedTopic);
                             <div class="input-group">
                                 <input
                                     type="text"
-                                    @input="searchTaskByName"
                                     id="search-task"
                                     placeholder="Descrição da tarefa"
                                     v-model="searchTask"
@@ -239,7 +248,6 @@ provide("selectedTopic", selectedTopic);
                             <div class="select">
                                 <select
                                     id="filter-task"
-                                    @change="searchTaskByStatus"
                                     v-model="filterTask"
                                     aria-describedby="filter-task-help"
                                 >
@@ -283,7 +291,8 @@ provide("selectedTopic", selectedTopic);
             <TaskFormAdd
                 v-if="modal.show.value"
                 @close="modal.hideModal"
-                :topicId="selectedTopic.id"
+                :topicId="selectedTopic?.id"
+                :topicName="selectedTopic?.name"
                 id="add-task-modal"
             />
         </Transition>

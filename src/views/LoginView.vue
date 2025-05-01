@@ -1,18 +1,18 @@
-<script setup>
-import { GOOGLE_AUTH_ERRORS, PAGE_TITLES } from "../utils/variables.js";
+<script setup lang="ts">
+import { GOOGLE_AUTH_ERRORS, PAGE_TITLES } from "../utils/variables.ts.ts";
 
 import { ref, watchEffect, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { signInWithPopup } from "firebase/auth";
 
-import { useToast } from "../composables/useToast.js";
-import { useAuthStore } from "../stores/authStore.js";
-import { useLoadingStore } from "../stores/loadingStore.js";
-import { useSidebarStore } from "../stores/sidebarStore.js";
+import { useToast } from "../composables/useToast.ts";
+import { useAuthStore } from "../stores/authStore.ts";
+import { useLoadingStore } from "../stores/loadingStore.ts";
+import { useSidebarStore } from "../stores/sidebarStore.ts";
 
 import UIButton from "../components/ui/UIButton.vue";
 import CreatorLink from "../components/shared/CreatorLink.vue";
-import { baseUrl } from "../utils/urlUtils.js";
+import { baseUrl } from "../utils/urlUtils.ts";
 
 const { provider, auth } = defineProps(["provider", "auth"]);
 const { showToast } = useToast();

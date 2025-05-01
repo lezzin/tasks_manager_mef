@@ -1,7 +1,7 @@
 import { ref } from "vue";
 
 export const useModal = () => {
-    const show = ref(false);
+    const show = ref<boolean>(false);
     const component = ref(null);
 
     return {

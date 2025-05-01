@@ -1,6 +1,6 @@
-import { TASK_PRIORITIES } from "./variables.js";
+import { TASK_PRIORITIES } from "./variables.ts";
 
-export function getPriorityClass(priority) {
+export function getPriorityClass(priority: number) {
     return (
         {
             [TASK_PRIORITIES.high]: "priority-high",
@@ -10,7 +10,7 @@ export function getPriorityClass(priority) {
     );
 }
 
-export function getPriorityText(priority) {
+export function getPriorityText(priority: number) {
     return (
         {
             [TASK_PRIORITIES.high]: "Alta prioridade",
@@ -20,7 +20,7 @@ export function getPriorityText(priority) {
     );
 }
 
-export function getPriorityIcon(priority) {
+export function getPriorityIcon(priority: number) {
     return (
         {
             [TASK_PRIORITIES.high]: "arrow-up",

@@ -1,6 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from "vue";
-import { useToast } from "../../composables/useToast.js";
+import { useToast } from "../../composables/useToast.ts";
 import UIButton from "../ui/UIButton.vue";
 
 const { showToast } = useToast();

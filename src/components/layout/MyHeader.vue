@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { baseUrl } from "../../utils/urlUtils";
 import { auth } from "../../libs/firebase";
 
@@ -7,7 +7,7 @@ import { ref } from "vue";
 import { storeToRefs } from "pinia";
 
 import { useToast } from "../../composables/useToast";
-import { useAuthStore } from "../../stores/authStore";
+import { useAuthStore } from "../../stores/authStore.ts";
 import { useSidebarStore } from "../../stores/sidebarStore";
 import { useLoadingStore } from "../../stores/loadingStore";
 
@@ -35,18 +35,20 @@ const logoutUser = async () => {
     loadingStore.showLoader();
 
     try {
-        await logout(auth);
+        await logout();
         router.push("/login");
         isAccountDropdownActive.value = false;
-    } catch ({ code, message }) {
-        const errors = {
-            "auth/network-request-failed":
+    } catch (error) {
+        const err = error as Error & { code?: string };
+
+        const errors: Record<string, () => void> = {
+            "auth/network-request-failed": () =>
                 "Falha na conexão de rede. Verifique sua conexão e tente novamente.",
-            "auth/internal-error": "Erro interno do servidor. Tente novamente mais tarde.",
-            "auth/no-current-user": "Nenhum usuário autenticado no momento.",
+            "auth/internal-error": () => "Erro interno do servidor. Tente novamente mais tarde.",
+            "auth/no-current-user": () => "Nenhum usuário autenticado no momento.",
         };
 
-        showToast("danger", errors[code] ?? `Erro ao sair: ${message}`);
+        (errors[err.code ?? ""] || (() => showToast("danger", `Erro ao sair: ${err.message}`)))();
     } finally {
         loadingStore.hideLoader();
     }
@@ -63,14 +65,17 @@ const removeUser = async () => {
         await deleteAccount();
         router.push("/login");
         isAccountDropdownActive.value = false;
-    } catch ({ code, message }) {
-        const errors = {
-            "auth/requires-recent-login": "Para excluir sua conta, faça login e tente novamente.",
-            "auth/network-request-failed":
+    } catch (error) {
+        const err = error as Error & { code?: string };
+
+        const errors: Record<string, () => void> = {
+            "auth/requires-recent-login": () =>
+                "Para excluir sua conta, faça login e tente novamente.",
+            "auth/network-request-failed": () =>
                 "Falha na conexão de rede. Verifique sua conexão e tente novamente.",
         };
 
-        showToast("danger", errors[code] ?? message);
+        (errors[err.code ?? ""] || (() => showToast("danger", `Erro ao sair: ${err.message}`)))();
     } finally {
         loadingStore.hideLoader();
     }
@@ -121,7 +126,7 @@ const removeUser = async () => {
 
                         <img
                             class="account__avatar"
-                            :src="user.photoURL"
+                            :src="user.photoURL ?? baseUrl('default-profile.png')"
                             alt="Foto de perfil do usuário"
                             width="37"
                             height="37"

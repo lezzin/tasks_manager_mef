@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { reactive } from "vue";
 
 import { useToast } from "../../composables/useToast";
@@ -22,15 +22,23 @@ const TIME_CONSTANTS = {
     PAUSE_PER_CYCLE_IN_MINUTES: 5,
 };
 
-const timer = reactive({
+const timer = reactive<{
+    minutes: number;
+    seconds: number;
+    cycleCount: number;
+    active: boolean;
+    paused: boolean;
+    onBreak: boolean;
+}>({
     minutes: TIME_CONSTANTS.WORK.minutes,
     seconds: TIME_CONSTANTS.WORK.seconds,
+    cycleCount: 1,
     active: false,
     paused: false,
-    cycleCount: 1,
     onBreak: false,
 });
-let timerInterval;
+
+let timerInterval: number;
 
 const startPomodoro = () => {
     if (timer.active && !timer.paused) return;
@@ -109,7 +117,7 @@ const resetTimer = () => {
     timer.onBreak = false;
 };
 
-const setTimer = (minutes, seconds) => {
+const setTimer = (minutes: number, seconds: number) => {
     timer.minutes = minutes;
     timer.seconds = seconds;
 };

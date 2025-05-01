@@ -1,7 +1,7 @@
-<script setup>
-import { PAGE_TITLES, TASK_PRIORITIES } from "../utils/variables.js";
-import { getPriorityClass, getPriorityText, getPriorityIcon } from "../utils/priorityUtils.js";
-import { formatDate } from "../utils/dateUtils.js";
+<script setup lang="ts">
+import { PAGE_TITLES, TASK_PRIORITIES } from "../utils/variables.ts";
+import { getPriorityClass, getPriorityText, getPriorityIcon } from "../utils/priorityUtils.ts";
+import { formatDate } from "../utils/dateUtils.ts";
 
 import { ref, reactive, onMounted } from "vue";
 import { RouterLink, useRouter } from "vue-router";
@@ -10,14 +10,15 @@ import domtoimage from "dom-to-image-more";
 import { saveAs } from "file-saver";
 import { marked } from "marked";
 
-import { useToast } from "../composables/useToast.js";
-import { useTask } from "../composables/useTask.js";
-import { useAuthStore } from "../stores/authStore.js";
-import { useLoadingStore } from "../stores/loadingStore.js";
-import { useSidebarStore } from "../stores/sidebarStore.js";
+import { useToast } from "../composables/useToast.ts";
+import { useTask } from "../composables/useTask.ts";
+import { useAuthStore } from "../stores/authStore.ts";
+import { useLoadingStore } from "../stores/loadingStore.ts";
+import { useSidebarStore } from "../stores/sidebarStore.ts";
 
 import ImageResponsive from "../components/shared/ImageResponsive.vue";
 import UIButton from "../components/ui/UIButton.vue";
+import type { Task } from "@/interfaces/Task.ts";
 
 const { showToast } = useToast();
 const { getUserTasksWithTopic } = useTask();
@@ -26,10 +27,16 @@ const sidebarStore = useSidebarStore();
 const loadingStore = useLoadingStore();
 const router = useRouter();
 
-const props = defineProps(["db"]);
+defineProps(["db"]);
 
 const isDownloading = ref(false);
-const allUserTasks = ref([]);
+
+// Store tasks as an array of Task objects
+const allUserTasks = ref<Task[]>([]);
+
+// Track hover and focus states for each task by task ID
+const taskStates = reactive<{ [key: string]: { isHovering: boolean; isFocused: boolean } }>({});
+
 const container = ref(null);
 const priorityCount = reactive({
     completed: 0,
@@ -38,34 +45,39 @@ const priorityCount = reactive({
     small: 0,
 });
 
-const downloadAsPDF = () => {
+const downloadAsImage = () => {
     isDownloading.value = true;
 
     domtoimage
         .toBlob(container.value)
-        .then((blob) => saveAs(blob, `${Date.now()}.png`))
-        .catch((error) =>
-            showToast("danger", "Erro ao baixar tarefas. Tente novamente mais tarde.")
-        )
+        .then((blob: Blob) => saveAs(blob, `${Date.now()}.png`))
+        .catch(() => showToast("danger", "Erro ao baixar tarefas. Tente novamente mais tarde."))
         .finally(() => (isDownloading.value = false));
 };
 
-const focusTasksByPriority = (priority) => {
+// Focus tasks by priority
+const focusTasksByPriority = (priority: string) => {
     allUserTasks.value.forEach((task) => {
-        task.isHovering = true;
-        task.isFocused =
-            task.priority === priority || (priority === TASK_PRIORITIES.completed && task.status);
+        taskStates[task.id] = {
+            isHovering: true,
+            isFocused:
+                task.priority === priority ||
+                (priority === TASK_PRIORITIES.completed && task.status),
+        };
     });
 };
 
+// Remove focus from all tasks
 const removeFocusFromTasks = () => {
     allUserTasks.value.forEach((task) => {
-        task.isHovering = false;
-        task.isFocused = false;
+        taskStates[task.id] = {
+            isHovering: false,
+            isFocused: false,
+        };
     });
 };
 
-const formatComment = (comment) => {
+const formatComment = (comment: string) => {
     return marked.parse(comment, {
         gfm: true,
         breaks: true,
@@ -86,6 +98,8 @@ const updatePriorityCounter = () => {
 };
 
 const loadTasks = async () => {
+    if (!user?.uid) return;
+
     loadingStore.showLoader();
 
     try {
@@ -115,7 +129,7 @@ onMounted(() => {
             <div class="task-view__header-buttons" v-if="!isDownloading">
                 <UIButton
                     type="button"
-                    @click="downloadAsPDF"
+                    @click="downloadAsImage"
                     variant="primary"
                     isIcon
                     title="Baixar todas as tarefas em PDF"
@@ -195,7 +209,10 @@ onMounted(() => {
                     'grid__item',
                     'task',
                     task.status && TASK_PRIORITIES.completed,
-                    { 'task--hovering': task.isHovering, 'task--focused': task.isFocused },
+                    {
+                        'task--hovering': taskStates[task.id]?.isHovering,
+                        'task--focused': taskStates[task.id]?.isFocused,
+                    },
                 ]"
                 v-for="task in allUserTasks"
                 :key="task.id"
@@ -230,29 +247,9 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
-                <div class="grid__item-footer" v-if="task.comment">
-                    <div class="grid__item-comment">
-                        <p class="text text--small text--muted">Comentário da tarefa:</p>
-
-                        <div
-                            class="markdown-content markdown-content--small truncate"
-                            v-html="formatComment(task.comment)"
-                            aria-label="Comentário sobre a tarefa"
-                        ></div>
-                    </div>
-                </div>
+                <div class="grid__item-footer" />
             </RouterLink>
         </div>
-    </div>
-
-    <div class="container" v-else>
-        <RouterLink to="/" title="Voltar para o início">
-            <ImageResponsive
-                small="task_empty_sm.png"
-                lg="task_empty_lg.png"
-                alt="Frase tarefas vazias e uma imagem de uma caixa vazia"
-            />
-        </RouterLink>
     </div>
 </template>
 

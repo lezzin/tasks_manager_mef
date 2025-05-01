@@ -13,11 +13,11 @@ export const useSidebarStore = defineStore("sidebar", () => {
         isTopicSidebarActive.value = false;
     };
 
-    const setShowSidebarToggler = (value) => {
+    const setShowSidebarToggler = (value: boolean) => {
         canShowSidebarToggler.value = value;
     };
 
-    const setSidebarActive = (value) => {
+    const setSidebarActive = (value: boolean) => {
         isTopicSidebarActive.value = value;
     };
 

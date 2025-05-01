@@ -1,6 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import { RouterLink, useRouter } from "vue-router";
-import { inject, markRaw, ref } from "vue";
+import { inject, markRaw, ref, type PropType } from "vue";
 
 import { useAuthStore } from "../../stores/authStore";
 import { useToast } from "../../composables/useToast";
@@ -10,6 +10,7 @@ import TopicFormEdit from "../forms/TopicFormEdit.vue";
 import UIButton from "../ui/UIButton.vue";
 import { useTopic } from "../../composables/useTopic";
 import CreatorLink from "../shared/CreatorLink.vue";
+import type { Topic } from "@/interfaces/Topic";
 
 const emit = defineEmits(["close"]);
 
@@ -21,26 +22,27 @@ const modal = useModal();
 
 const props = defineProps({
     data: {
-        type: Array,
+        type: Array as PropType<Topic[] | null>,
         default() {
             return [];
         },
     },
 });
 
-const selectedTopic = inject("selectedTopic");
+const selectedTopic = inject("selectedTopic") as any;
+const editingTopic = ref<string>("");
 
 const closeTopicsMenu = () => emit("close");
 
-const editingTopic = ref(null);
-
-const openEditTopicModal = (topicName) => {
+const openEditTopicModal = (topicName: string) => {
     editingTopic.value = topicName;
-    modal.component.value = markRaw(TopicFormEdit);
+    modal.component.value = markRaw(TopicFormEdit) as any;
     modal.showModal();
 };
 
-const handleDeleteTopic = async (topicId) => {
+const handleDeleteTopic = async (topicId: string) => {
+    if (!user?.uid) return;
+
     if (!confirm("Tem certeza que deseja excluir esse tópico? Essa ação não poderá ser desfeita!"))
         return;
 
@@ -50,11 +52,14 @@ const handleDeleteTopic = async (topicId) => {
         selectedTopic.value = null;
         if (router.currentRoute.value.fullPath !== "/") router.push("/");
     } catch (error) {
-        showToast("danger", error?.message ?? "Erro desconhecido. Tente novamente mais tarde.");
+        const err = error as Error;
+        showToast("danger", err.message ?? "Erro desconhecido. Tente novamente mais tarde.");
     }
 };
 
 const handleDeleteAllTopics = async () => {
+    if (!user?.uid) return;
+
     if (
         !confirm(
             "Tem certeza que deseja excluir TODOS os seus tópicos? Essa ação não poderá ser desfeita!"
@@ -67,8 +72,8 @@ const handleDeleteAllTopics = async () => {
         showToast("success", "Todos os tópicos foram excluídos com sucesso.");
         selectedTopic.value = null;
     } catch (error) {
-        console.error(error);
-        showToast("danger", error?.message ?? "Erro desconhecido. Tente novamente mais tarde.");
+        const err = error as Error;
+        showToast("danger", err.message ?? "Erro desconhecido. Tente novamente mais tarde.");
     }
 };
 </script>

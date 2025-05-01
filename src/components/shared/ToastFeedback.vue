@@ -1,34 +1,36 @@
-<script setup>
-import { computed, onMounted, onBeforeUnmount } from "vue";
-import { TOAST_TIMEOUT } from "../../utils/variables";
+<script setup lang="ts">
+import { computed, onMounted, onBeforeUnmount, type PropType } from "vue";
+import { TOAST_TIMEOUT } from "../../utils/variables.ts";
 import UIButton from "../ui/UIButton.vue";
+
+type ToastType = "danger" | "warning" | "success";
 
 const props = defineProps({
     data: {
-        type: Object,
+        type: Object as PropType<{ type: ToastType; text: string; show: boolean }>,
         required: true,
     },
 });
 
 const emit = defineEmits(["close"]);
 
-const TOAST_TITLES = {
+const TOAST_TITLES: Record<ToastType, string> = {
     danger: "Oops!",
     warning: "Cuidado!",
     success: "Sucesso",
 };
 
-const TOAST_ICONS = {
+const TOAST_ICONS: Record<ToastType, string> = {
     warning: "exclamation",
     danger: "xmark",
     success: "check",
 };
 
-const title = computed(() => TOAST_TITLES[props.data.type]);
-const iconClass = computed(() => TOAST_ICONS[props.data.type]);
-const toastClass = computed(() => `toast toast--${props.data.type}`);
+const title = computed<string>(() => TOAST_TITLES[props.data?.type ?? ""]);
+const iconClass = computed<string>(() => TOAST_ICONS[props.data?.type ?? ""]);
+const toastClass = computed<string>(() => `toast toast--${props.data?.type ?? ""}`);
 
-let timeoutId;
+let timeoutId: number;
 
 onMounted(() => {
     timeoutId = setTimeout(() => closeToast(), TOAST_TIMEOUT);
@@ -73,7 +75,7 @@ function closeToast() {
 .toast {
     --__toast-bg: transparent;
 
-    position: absolute;
+    position: fixed;
     top: 2rem;
     right: 2rem;
     display: grid;

@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { auth, db } from "../libs/firebase.js";
+import { auth, db } from "../libs/firebase.ts";
 import { deleteUser, onAuthStateChanged, signOut } from "firebase/auth";
-import { PRINCIPAL_DOC_NAME } from "../utils/variables.js";
+import { PRINCIPAL_DOC_NAME } from "../utils/variables.ts";
 import { deleteDoc, doc } from "firebase/firestore";
 
 export const useAuthStore = defineStore("auth", () => {
@@ -23,11 +23,11 @@ export const useAuthStore = defineStore("auth", () => {
     };
 
     const deleteAccount = async () => {
-        const docRef = doc(db, PRINCIPAL_DOC_NAME, user.value.uid);
+        if (!user.value || !auth.currentUser) return;
 
         try {
-            await deleteDoc(docRef);
-            await deleteUser(auth.currentUser);
+            const docRef = doc(db, PRINCIPAL_DOC_NAME, user.value.uid);
+            await Promise.all([deleteDoc(docRef), deleteUser(auth.currentUser)]);
         } catch (error) {
             throw error;
         }

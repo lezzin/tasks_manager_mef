@@ -1,7 +1,7 @@
-<script setup>
-import { PAGE_TITLES, TASK_KANBAN_STATUSES } from "../../utils/variables";
+<script setup lang="ts">
+import { PAGE_TITLES, TASK_KANBAN_STATUSES } from "../../utils/variables.ts";
 
-import { onMounted, reactive, ref, markRaw, onBeforeUnmount } from "vue";
+import { onMounted, reactive, ref, markRaw } from "vue";
 import { useRouter } from "vue-router";
 import { marked } from "marked";
 
@@ -11,11 +11,13 @@ import { useToast } from "../../composables/useToast";
 import { useModal } from "../../composables/useModal";
 import { useTask } from "../../composables/useTask";
 
-import CommentModal from "../task/.vue";
+import CommentModal from "../../components/task/CommentModal.vue";
 import UIButton from "../ui/UIButton.vue";
-import Task from "../task/TaskItem.vue";
 
-const props = defineProps({
+import type { Task } from "@/interfaces/Task.ts";
+import TaskItem from "../task/TaskItem.vue";
+
+defineProps({
     hasTasks: { type: Boolean },
 });
 
@@ -27,18 +29,26 @@ const router = useRouter();
 const modal = useModal();
 const { getUserTasksWithTopic, changeStatus } = useTask();
 
-const tasks = reactive({ data: [] });
+const tasks = reactive<{
+    data: Task[] | [];
+}>({ data: [] });
 
-const isDropdownOpen = ref(false);
-const selectedComment = ref("");
+const isDropdownOpen = ref<boolean>(false);
+const selectedComment = ref<string>("");
 
 const loadTasks = async () => {
+    if (!user?.uid) return;
+
     loadingStore.showLoader();
+
     try {
         tasks.data = await getUserTasksWithTopic(user.uid);
     } catch (error) {
-        showToast("danger", error.message);
-        if (error.code === "topic-not-found" || error.code === "doc-not-found") {
+        const err = error as Error & { code?: string };
+
+        showToast("danger", err.message);
+
+        if (err.code === "topic-not-found" || err.code === "doc-not-found") {
             router.push("/");
         }
     } finally {
@@ -46,7 +56,9 @@ const loadTasks = async () => {
     }
 };
 
-const handleChangeTaskStatus = async (taskToUpdate) => {
+const handleChangeTaskStatus = async (taskToUpdate: Task) => {
+    if (!user?.uid) return;
+
     try {
         const newStatus = await changeStatus(taskToUpdate, user.uid);
         taskToUpdate.status = newStatus;
@@ -63,9 +75,9 @@ const toggleDropdown = () => {
     isDropdownOpen.value = !isDropdownOpen.value;
 };
 
-const openTaskComment = (comment) => {
-    selectedComment.value = marked(comment);
-    modal.component.value = markRaw(CommentModal);
+const openTaskComment = async (comment: string) => {
+    selectedComment.value = await marked(comment);
+    modal.component.value = markRaw(CommentModal) as any;
     modal.showModal();
 };
 
@@ -89,7 +101,7 @@ onMounted(() => {
 
         <Transition name="slide">
             <div class="task-nav" v-if="isDropdownOpen">
-                <Task
+                <TaskItem
                     v-for="task in tasks.data"
                     :key="task.id"
                     :task="task"

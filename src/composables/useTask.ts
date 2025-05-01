@@ -1,30 +1,31 @@
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-
 import { db } from "../libs/firebase";
 
 import { useAuthStore } from "../stores/authStore";
-import { PRINCIPAL_DOC_NAME, TASK_KANBAN_STATUSES } from "../utils/variables";
-
+import { PRINCIPAL_DOC_NAME, TASK_KANBAN_STATUSES } from "../utils/variables.ts";
 import { filterField } from "../utils/stringUtils";
 import { currentTime } from "../utils/dateUtils";
 
 import { useTopic } from "./useTopic";
+import type { Task, TaskAddInterface } from "@/interfaces/Task.ts";
 
 const { user } = useAuthStore();
 
-const throwValidationError = (message, code) => {
+type TaskMap = Record<string, Task>;
+
+const throwValidationError = (message: string, code: string): never => {
     const error = new Error(message);
-    error.code = code;
+    (error as any).code = code;
     throw error;
 };
 
-const validateTaskName = (name) => {
+const validateTaskName = (name: string): void => {
     if (!name) {
         throwValidationError("Preencha o campo", "empty-name");
     }
 };
 
-const validateDeliveryDate = (date) => {
+const validateDeliveryDate = (date?: string): void => {
     if (date) {
         const taskDate = new Date(date);
         const today = new Date();
@@ -37,29 +38,26 @@ const validateDeliveryDate = (date) => {
     }
 };
 
-const checkUserTasks = async () => {
+const checkUserTasks = async (): Promise<boolean> => {
     let hasAnyTask = false;
+
+    if (!user?.uid) return false;
 
     try {
         const docRef = doc(db, PRINCIPAL_DOC_NAME, user.uid);
         const docSnap = await getDoc(docRef);
-
-        if (!docSnap.exists()) {
-            hasAnyTask = false;
-            return hasAnyTask;
-        }
+        if (!docSnap.exists()) return false;
 
         const userData = docSnap.data();
-        hasAnyTask = userData.tasks && Object.entries(userData.tasks).length > 0;
+        hasAnyTask = !!userData.tasks && Object.entries(userData.tasks).length > 0;
     } catch (error) {
         console.error("Error fetching user tasks:", error);
-        hasAnyTask = false;
     }
 
     return hasAnyTask;
 };
 
-const getUserTasks = async (userId) => {
+const getUserTasks = async (userId: string): Promise<TaskMap> => {
     try {
         const docRef = doc(db, PRINCIPAL_DOC_NAME, userId);
         const docSnap = await getDoc(docRef);
@@ -67,51 +65,56 @@ const getUserTasks = async (userId) => {
         if (!docSnap.exists()) throwValidationError("Documento não encontrado.", "doc-not-found");
 
         const userData = docSnap.data();
-        return userData.tasks ? { ...userData.tasks } : {};
+        return userData?.tasks ? { ...userData.tasks } : {};
     } catch (error) {
         throw error;
     }
 };
 
-const getUserTasksByTopic = async (topicId, userId) => {
+const getUserTasksByTopic = async (topicId: string, userId: string): Promise<Task[]> => {
     const tasks = await getUserTasks(userId);
-    return Object.values(tasks).filter((task) => task.topicId === topicId);
+    return Object.values(tasks).filter((task) => task?.topicId === topicId);
 };
 
-const getUserTasksWithTopic = async (userId) => {
+const getUserTasksWithTopic = async (userId: string): Promise<Task[]> => {
     const data = await getUserTasks(userId);
     const userTasks = Object.values(data);
     const { getTopicInfo } = useTopic();
 
     await Promise.all(
         userTasks.map(async (task) => {
-            const { name } = await getTopicInfo(task.topicId, userId);
-            task.topicName = name;
+            const topic = await getTopicInfo(task.topicId, userId);
+            if (!topic) return;
+
+            task.topicName = topic.name;
         })
     );
 
     return userTasks;
 };
 
-const updateTasks = async (userId, tasks) => {
+const updateTasks = async (userId: string, tasks: TaskMap | null): Promise<void> => {
     const docRef = doc(db, PRINCIPAL_DOC_NAME, userId);
     await updateDoc(docRef, { tasks });
 };
 
-const addTask = async (topicId, newName, comment, priority, deliveryDate, userId) => {
-    validateTaskName(newName);
-    validateDeliveryDate(deliveryDate);
+const addTask = async (options: TaskAddInterface, userId: string): Promise<void> => {
+    const { topicId, topicName, name, comment, priority, delivery_date } = options;
 
-    const newTask = {
+    validateTaskName(name);
+    validateDeliveryDate(delivery_date);
+
+    const newTask: Task = {
         id: Date.now().toString(36),
-        name: filterField(newName),
+        name: filterField(name),
         status: false,
         created_at: currentTime(),
         priority,
         comment: String(comment).trim() ?? "",
-        delivery_date: deliveryDate,
+        delivery_date,
         kanbanStatus: TASK_KANBAN_STATUSES.todo,
-        topicId: topicId,
+        topicId,
+        topicName,
     };
 
     const allTasks = await getUserTasks(userId);
@@ -120,17 +123,17 @@ const addTask = async (topicId, newName, comment, priority, deliveryDate, userId
 };
 
 const editTask = async (
-    taskToUpdate,
-    newName,
-    newComment,
-    newPriority,
-    newDeliveryDate,
-    userId
-) => {
+    taskToUpdate: Task,
+    newName: string,
+    newComment: string,
+    newPriority: number,
+    newDeliveryDate: string,
+    userId: string
+): Promise<void> => {
     validateTaskName(newName);
     validateDeliveryDate(newDeliveryDate);
 
-    const updatedTask = {
+    const updatedTask: Task = {
         ...taskToUpdate,
         name: filterField(newName),
         priority: newPriority,
@@ -143,9 +146,9 @@ const editTask = async (
     await updateTasks(userId, updatedTasks);
 };
 
-const changeStatus = async (taskToUpdate, userId) => {
+const changeStatus = async (taskToUpdate: Task, userId: string): Promise<boolean> => {
     const newStatus = !taskToUpdate.status;
-    const updatedTask = {
+    const updatedTask: Task = {
         ...taskToUpdate,
         status: newStatus,
         kanbanStatus: newStatus ? TASK_KANBAN_STATUSES.completed : TASK_KANBAN_STATUSES.todo,
@@ -158,8 +161,12 @@ const changeStatus = async (taskToUpdate, userId) => {
     return newStatus;
 };
 
-const changeKanbanStatus = async (taskToUpdate, newKanbanStatus, userId) => {
-    const updatedTask = {
+const changeKanbanStatus = async (
+    taskToUpdate: Task,
+    newKanbanStatus: string,
+    userId: string
+): Promise<void> => {
+    const updatedTask: Task = {
         ...taskToUpdate,
         kanbanStatus: newKanbanStatus,
         status: newKanbanStatus === TASK_KANBAN_STATUSES.completed,
@@ -170,9 +177,8 @@ const changeKanbanStatus = async (taskToUpdate, newKanbanStatus, userId) => {
     await updateTasks(userId, updatedTasks);
 };
 
-const deleteTask = async (taskToDelete, userId) => {
+const deleteTask = async (taskToDelete: Task, userId: string): Promise<void> => {
     const allTasks = await getUserTasks(userId);
-
     const { [taskToDelete.id]: _, ...remainingTasks } = allTasks;
     await updateTasks(userId, remainingTasks);
 };

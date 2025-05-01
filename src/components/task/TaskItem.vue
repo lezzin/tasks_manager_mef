@@ -1,9 +1,10 @@
-<script setup>
+<script setup lang="ts">
 import { getPriorityClass, getPriorityIcon, getPriorityText } from "../../utils/priorityUtils";
 import { formatDate } from "../../utils/dateUtils";
 
 import UIButton from "../ui/UIButton.vue";
-import { useAttrs } from "vue";
+import { useAttrs, type PropType } from "vue";
+import type { Task } from "@/interfaces/Task";
 
 const emit = defineEmits(["changeStatus", "openComment", "edit", "delete"]);
 
@@ -11,7 +12,7 @@ const attrs = useAttrs();
 
 const props = defineProps({
     task: {
-        type: Object,
+        type: Object as PropType<Task>,
         default: null,
     },
     showPriorities: {
@@ -40,10 +41,10 @@ const props = defineProps({
     },
 });
 
-const changeTaskStatus = (task) => emit("changeStatus", task);
-const openTaskComment = (comment) => emit("openComment", comment);
-const openEditTaskModal = (task) => emit("edit", task);
-const deleteTask = (task) => emit("delete", task);
+const changeTaskStatus = (task: Task) => emit("changeStatus", task);
+const openTaskComment = (comment: string) => emit("openComment", comment);
+const openEditTaskModal = (task: Task) => emit("edit", task);
+const deleteTask = (task: Task) => emit("delete", task);
 </script>
 
 <template>

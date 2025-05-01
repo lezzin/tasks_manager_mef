@@ -1,12 +1,13 @@
+import type { ConfirmModalInterface } from "@/interfaces/ConfirmModalInterface";
 import { ref } from "vue";
 
-const modalData = ref({
+const modalData = ref<ConfirmModalInterface>({
     message: "",
     show: false,
     callback: null,
 });
 
-const setConfirmModal = (message, callback) => {
+const setConfirmModal = (message: string, callback: (() => void) | null) => {
     modalData.value.show = true;
     modalData.value.message = message;
     modalData.value.callback = callback;
