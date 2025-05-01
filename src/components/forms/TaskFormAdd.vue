@@ -13,8 +13,8 @@ import InputRecognition from "../utilities/InputRecognition.vue";
 import MarkdownEditor from "../utilities/MarkdownEditor.vue";
 import UIDropdown from "../ui/UIDropdown.vue";
 import UIModal from "../ui/UIModal.vue";
-import type { TaskAddInterface } from "@/interfaces/Task.ts";
 import type { SuggestionResponse } from "@/interfaces/SuggestionResponse.ts";
+import type { TaskAddInterface, TaskPriority } from "@/interfaces/Task.ts";
 
 const props = defineProps({
     topicId: {
@@ -50,7 +50,7 @@ const isRequestingGemini = ref(false);
 const taskName = ref<string>("");
 const taskNameError = ref<string>("");
 
-const taskPriority = ref(TASK_PRIORITIES.low);
+const taskPriority = ref<TaskPriority>(TASK_PRIORITIES.low);
 const taskDate = ref<string>("");
 const taskDateError = ref<string>("");
 const taskComment = ref<string>("");

@@ -1,12 +1,15 @@
+export type TaskStatus = "todo" | "doing" | "completed";
+export type TaskPriority = 1 | 2 | 3 | 4;
+
 export interface Task {
     id: string;
     name: string;
     status: boolean;
     created_at: string;
-    priority: number;
+    priority: TaskPriority;
     comment?: string;
     delivery_date: string;
-    kanbanStatus: string;
+    kanbanStatus: TaskStatus;
     topicId: string;
     topicName: string;
 }

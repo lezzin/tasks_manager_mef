@@ -13,14 +13,16 @@ import { useSidebarStore } from "../stores/sidebarStore.ts";
 
 import ImageResponsive from "../components/shared/ImageResponsive.vue";
 import UIButton from "../components/ui/UIButton.vue";
-import type { Task } from "@/interfaces/Task.ts";
+import type { Task, TaskStatus } from "@/interfaces/Task.ts";
+import type { Firestore } from "firebase/firestore";
 
-// Define Props type with explicit typing
+type TaskDirection = "prev" | "next";
+type DragAction = "start" | "end";
+
 const props = defineProps<{
-    db?: Firestore; // Add specific Firestore type here
+    db?: Firestore;
 }>();
 
-// Define reactive state for tasks
 const tasks = reactive<{
     todo: Task[];
     doing: Task[];
@@ -31,9 +33,9 @@ const tasks = reactive<{
     completed: [],
 });
 
-const draggedTask = ref<Task | null>(null); // Task type or null
-const activeColumn = ref<string | null>(null); // Column as string or null
-const tasksLength = ref<number>(0); // Number of tasks
+const draggedTask = ref<Task | null>(null);
+const activeColumn = ref<string | null>(null);
+const tasksLength = ref<number>(0);
 
 const { showToast } = useToast();
 const { getUserTasksWithTopic, changeKanbanStatus } = useTask();
@@ -42,7 +44,8 @@ const loadingStore = useLoadingStore();
 const sidebarStore = useSidebarStore();
 const router = useRouter();
 
-// Fetch tasks based on user ID
+const kanbanStatuses: TaskStatus[] = ["todo", "doing", "completed"];
+
 const loadTasks = async () => {
     if (!user?.uid) return;
 
@@ -59,7 +62,6 @@ const loadTasks = async () => {
     }
 };
 
-// Organize tasks into columns based on status
 const organizeTasksByStatus = (userTasks: Task[]) => {
     tasks.todo = userTasks.filter(
         (task) => task.kanbanStatus === TASK_KANBAN_STATUSES.todo || !task.kanbanStatus
@@ -72,56 +74,59 @@ const organizeTasksByStatus = (userTasks: Task[]) => {
     );
 };
 
-// Handle drag events on tasks
-const handleDragEvents = (event: DragEvent, action: string, task: Task | null = null) => {
+const handleDragEvents = (event: DragEvent, action: DragAction, task: Task | null = null) => {
+    const currentElement = event.target as Element;
+
     if (action === "start") {
         draggedTask.value = task;
-        event?.target?.classList?.add("dragging");
+        currentElement?.classList?.add("dragging");
     } else if (action === "end") {
-        event?.target?.classList?.remove("dragging");
+        currentElement?.classList?.remove("dragging");
         draggedTask.value = null;
     }
 };
 
-// Drop task into a new column
-const onDrop = (column: string) => {
+const onDrop = (column: TaskStatus) => {
     if (draggedTask.value && draggedTask.value.kanbanStatus !== column) {
         changeTaskColumn(draggedTask.value, column);
     }
+
     draggedTask.value = null;
     activeColumn.value = null;
 };
 
-// Handle drag enter event to highlight the active column
 const onDragEnter = (event: DragEvent, kanbanStatus: string) => {
     if (activeColumn.value !== kanbanStatus) {
         activeColumn.value = kanbanStatus;
     }
+
     event.preventDefault();
 };
 
-// Handle drag over event
 const onDragOver = (event: DragEvent) => {
     event.preventDefault();
 };
 
-// Move task between columns
-const moveTask = (task: Task, direction: "prev" | "next") => {
+const moveTask = (task: Task, direction: TaskDirection) => {
     const newColumn = getNewColumn(task.kanbanStatus, direction);
+
     if (newColumn) {
         changeTaskColumn(task, newColumn);
     }
 };
 
-// Determine the new column based on current column and direction
-const getNewColumn = (currentColumn: string, direction: "prev" | "next"): string | null => {
-    const columns = ["todo", "doing", "completed"];
-    const currentIndex = columns.indexOf(currentColumn);
-    return direction === "prev" && currentIndex > 0
-        ? columns[currentIndex - 1]
-        : direction === "next" && currentIndex < columns.length - 1
-        ? columns[currentIndex + 1]
-        : null;
+const getNewColumn = (currentColumn: TaskStatus, direction: TaskDirection): TaskStatus | null => {
+    const currentIndex = kanbanStatuses.indexOf(currentColumn);
+
+    if (direction === "prev" && currentIndex > 0) {
+        return kanbanStatuses[currentIndex - 1];
+    }
+
+    if (direction === "next" && currentIndex < kanbanStatuses.length - 1) {
+        return kanbanStatuses[currentIndex + 1];
+    }
+
+    return null;
 };
 
 const isFirstColumn = (kanbanStatus: string) => {
@@ -132,19 +137,23 @@ const isLastColumn = (kanbanStatus: string) => {
     return kanbanStatus === "completed";
 };
 
-const changeTaskColumn = (task: Task, newColumn: string) => {
+const changeTaskColumn = (task: Task, newColumn: TaskStatus) => {
     task.kanbanStatus = newColumn;
+
     tasks.todo = tasks.todo.filter((t) => t !== task);
     tasks.doing = tasks.doing.filter((t) => t !== task);
     tasks.completed = tasks.completed.filter((t) => t !== task);
     tasks[newColumn].push(task);
+
     updateTaskStatus(task, newColumn);
 };
 
-const updateTaskStatus = async (taskToUpdate: Task, newKanbanStatus: string) => {
+const updateTaskStatus = async (taskToUpdate: Task, newKanbanStatus: TaskStatus) => {
+    if (!user?.uid) return;
+
     try {
         changeKanbanStatus(taskToUpdate, newKanbanStatus, user.uid);
-        taskToUpdate.kanban = newKanbanStatus;
+        taskToUpdate.kanbanStatus = newKanbanStatus;
         taskToUpdate.status = newKanbanStatus === TASK_KANBAN_STATUSES.completed;
     } catch (error) {
         showToast("danger", `Erro ao atualizar Kanban. Tente novamente mais tarde.`);
@@ -188,7 +197,7 @@ onMounted(() => {
 
             <div
                 class="kanban__column"
-                v-for="kanbanStatus in ['todo', 'doing', 'completed']"
+                v-for="kanbanStatus in kanbanStatuses"
                 :key="kanbanStatus"
                 :class="{ 'drag-over': activeColumn === kanbanStatus }"
                 @drop="onDrop(kanbanStatus)"

@@ -1,6 +1,7 @@
+import type { TaskPriority } from "@/interfaces/Task.ts";
 import { TASK_PRIORITIES } from "./variables.ts";
 
-export function getPriorityClass(priority: number) {
+export function getPriorityClass(priority: TaskPriority): string {
     return (
         {
             [TASK_PRIORITIES.high]: "priority-high",
@@ -10,7 +11,7 @@ export function getPriorityClass(priority: number) {
     );
 }
 
-export function getPriorityText(priority: number) {
+export function getPriorityText(priority: TaskPriority): string {
     return (
         {
             [TASK_PRIORITIES.high]: "Alta prioridade",
@@ -20,7 +21,7 @@ export function getPriorityText(priority: number) {
     );
 }
 
-export function getPriorityIcon(priority: number) {
+export function getPriorityIcon(priority: TaskPriority): string {
     return (
         {
             [TASK_PRIORITIES.high]: "arrow-up",

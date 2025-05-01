@@ -1,20 +1,24 @@
 <script setup lang="ts">
-import { useToast } from "../../composables/useToast";
-import { useTask } from "../../composables/useTask";
-import { useAuthStore } from "../../stores/authStore";
-import { useModal } from "../../composables/useModal";
+import type { Task } from "@/interfaces/Task";
+
+import { useToast } from "@/composables/useToast";
+import { useTask } from "@/composables/useTask";
+import { useAuthStore } from "@/stores/authStore";
+import { useModal } from "@/composables/useModal";
+import { useConfirmModal } from "@/composables/useConfirmModal";
 
 import { marked } from "marked";
 import { inject, markRaw, ref, type PropType } from "vue";
 
-import TaskFormEdit from "../forms/TaskFormEdit.vue";
 import CommentModal from "./CommentModal.vue";
 import TaskItem from "./TaskItem.vue";
-import type { Task } from "@/interfaces/Task";
+import TaskFormEdit from "../forms/TaskFormEdit.vue";
+
+const { changeStatus, deleteTask } = useTask();
+const { setConfirmModal } = useConfirmModal();
+const { showToast } = useToast();
 
 const { user } = useAuthStore();
-const { changeStatus, deleteTask } = useTask();
-const { showToast } = useToast();
 const modal = useModal();
 
 const props = defineProps({
@@ -47,11 +51,15 @@ const handleChangeTaskStatus = async (taskToUpdate: Task) => {
     }
 };
 
+const confirmTaskRemotion = (taskToDelete: Task) => {
+    setConfirmModal(
+        "Tem certeza que deseja excluir essa tarefa? Essa ação não poderá ser desfeita!",
+        () => handleDeleteTask(taskToDelete)
+    );
+};
+
 const handleDeleteTask = async (taskToDelete: Task) => {
     if (!user?.uid) return;
-
-    if (!confirm("Tem certeza que deseja excluir essa tarefa? Essa ação não poderá ser desfeita!"))
-        return;
 
     try {
         await deleteTask(taskToDelete, user.uid);
@@ -83,7 +91,7 @@ const openTaskComment = async (comment: string) => {
             @changeStatus="handleChangeTaskStatus"
             @edit="openEditTaskModal"
             @openComment="openTaskComment"
-            @delete="handleDeleteTask"
+            @delete="confirmTaskRemotion"
         />
 
         <p class="text text--center" v-if="props.tasks.length === 0">

@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { PRINCIPAL_DOC_NAME, PAGE_TITLES, TASK_PRIORITIES } from "../utils/variables.ts";
+import { type ComputedRef } from "vue";
+import type { Task, TaskStatus } from "@/interfaces/Task";
+import type { Topic } from "@/interfaces/Topic.ts";
+
+import { PRINCIPAL_DOC_NAME, PAGE_TITLES, TASK_KANBAN_STATUSES } from "../utils/variables.ts";
 
 import { onMounted, provide, reactive, ref, computed, watch, markRaw, type PropType } from "vue";
 import { doc, Firestore, onSnapshot } from "firebase/firestore";
@@ -18,8 +22,6 @@ import TopicFormAdd from "../components/forms/TopicFormAdd.vue";
 import TopicNavigation from "../components/topic/TopicNavigation.vue";
 import ImageResponsive from "../components/shared/ImageResponsive.vue";
 import UIButton from "../components/ui/UIButton.vue";
-import type { Task } from "@/interfaces/Task.ts";
-import type { Topic } from "@/interfaces/Topic.ts";
 
 const props = defineProps({
     db: {
@@ -46,22 +48,42 @@ const router = useRouter();
 const filterTask = ref("all");
 const searchTask = ref("");
 
-const filteredTasks = computed(() => {
-    let tasks = defaultTasks.value;
+const STATUS_ORDER: Record<TaskStatus, number> = {
+    todo: 1,
+    doing: 2,
+    completed: 3,
+};
+
+const FILTER_ORDERS = {
+    all: TASK_KANBAN_STATUSES.completed,
+    completed: TASK_KANBAN_STATUSES.todo || TASK_KANBAN_STATUSES.doing,
+    "not-completed": TASK_KANBAN_STATUSES.todo || TASK_KANBAN_STATUSES.doing,
+};
+
+const filteredTasks: ComputedRef<Task[]> = computed(() => {
+    let tasks: Task[] = defaultTasks.value;
 
     if (searchTask.value.trim()) {
         const searchTerm = searchTask.value.trim().toLowerCase();
-        tasks = tasks.filter((task) => task.name.toLowerCase().includes(searchTerm));
+        tasks = tasks.filter((task: Task) => task.name.toLowerCase().includes(searchTerm));
     }
 
-    if (filterTask.value !== "all") {
-        const taskIsCompleted = filterTask.value === TASK_PRIORITIES.completed;
-        tasks = tasks.filter((task) => task.status === taskIsCompleted);
+    if (filterTask.value === "completed") {
+        tasks = tasks.filter((task: Task) => task.kanbanStatus === "completed");
+    } else if (filterTask.value === "not-completed") {
+        tasks = tasks.filter(
+            (task: Task) => task.kanbanStatus === "todo" || task.kanbanStatus === "doing"
+        );
     }
 
-    return tasks.sort((taskA, taskB) => {
-        if (taskA.status !== taskB.status) return taskA.status ? -1 : 1;
-        if (taskA.priority !== taskB.priority) return taskB.priority - taskA.priority;
+    return tasks.sort((taskA: Task, taskB: Task) => {
+        const statusComparison =
+            STATUS_ORDER[taskA.kanbanStatus] - STATUS_ORDER[taskB.kanbanStatus];
+        if (statusComparison !== 0) return statusComparison;
+
+        const priorityComparison = taskB.priority - taskA.priority;
+        if (priorityComparison !== 0) return priorityComparison;
+
         return taskA.name.localeCompare(taskB.name);
     });
 });

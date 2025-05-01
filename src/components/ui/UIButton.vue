@@ -2,70 +2,59 @@
 import { RouterLink } from "vue-router";
 import { useAttrs } from "vue";
 
-const props = defineProps({
-    isLink: {
-        type: Boolean,
-        default: false,
-    },
-    isIcon: {
-        type: Boolean,
-        default: false,
-    },
-    isRounded: {
-        type: Boolean,
-        default: false,
-    },
-    isDropdown: {
-        type: Boolean,
-        default: false,
-    },
-    isBordered: {
-        type: Boolean,
-        default: false,
-    },
-    to: {
-        type: String,
-        default: "",
-    },
-    variant: {
-        type: String,
-        default: "",
-    },
-    type: {
-        type: String,
-        default: "button",
-    },
-});
+type ButtonVariant =
+    | ""
+    | "primary"
+    | "outline-primary"
+    | "outline-primary-small"
+    | "outline-primary-smallest"
+    | "warning"
+    | "danger"
+    | "outline-danger"
+    | "outline-danger-small";
+
+type ButtonType = "button" | "submit" | "reset";
+
+const props = defineProps<{
+    isLink?: boolean;
+    isIcon?: boolean;
+    isRounded?: boolean;
+    isDropdown?: boolean;
+    isBordered?: boolean;
+    to?: string;
+    variant?: ButtonVariant;
+    type?: ButtonType;
+    title?: string;
+}>();
 
 const attrs = useAttrs();
 
-const BUTTON_VARIANTS_CLASSES = {
+const BUTTON_VARIANTS_CLASSES: Record<ButtonVariant, string> = {
+    "": "",
     primary: "btn--primary",
     "outline-primary": "btn--outline-primary",
     "outline-primary-small": "btn--outline-primary btn--small",
     "outline-primary-smallest": "btn--outline-primary btn--smallest",
-
     warning: "btn--warning",
-
     danger: "btn--danger",
     "outline-danger": "btn--outline-danger",
     "outline-danger-small": "btn--outline-danger btn--small",
 };
 
-const getClass = () => {
+const getClass = (): string => {
     const rounded = props.isRounded ? "btn--rounded" : "";
     const icon = props.isIcon ? "btn--only-icon" : "";
     const bordered = props.isBordered ? "btn--bordered" : "";
     const dropdown = props.isDropdown ? "btn--dropdown" : "";
     return `btn ${
-        BUTTON_VARIANTS_CLASSES[props.variant] ?? ""
+        BUTTON_VARIANTS_CLASSES[props.variant ?? ""]
     } ${rounded} ${bordered} ${icon} ${dropdown}`;
 };
 </script>
 
 <template>
     <button
-        :type="props.type"
+        :type="props.type ?? 'button'"
         v-if="!props.isLink"
         :class="getClass()"
         :title="props.title"
@@ -74,7 +63,7 @@ const getClass = () => {
         <slot></slot>
     </button>
 
-    <RouterLink v-else :to="props.to" :class="getClass()" :title="props.title" v-bind="attrs">
+    <RouterLink v-else :to="props.to ?? ''" :class="getClass()" :title="props.title" v-bind="attrs">
         <slot></slot>
     </RouterLink>
 </template>

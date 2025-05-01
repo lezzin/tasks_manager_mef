@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount, type PropType } from "vue";
-import { TOAST_TIMEOUT } from "../../utils/variables.ts";
-import UIButton from "../ui/UIButton.vue";
+import type { ToastInterface, ToastType } from "@/interfaces/Toast.ts";
 
-type ToastType = "danger" | "warning" | "success";
+import { TOAST_TIMEOUT } from "../../utils/variables.ts";
+import { computed, onMounted, onBeforeUnmount, type PropType } from "vue";
+
+import UIButton from "../ui/UIButton.vue";
 
 const props = defineProps({
     data: {
-        type: Object as PropType<{ type: ToastType; text: string; show: boolean }>,
+        type: Object as PropType<ToastInterface>,
         required: true,
     },
 });
@@ -26,9 +27,9 @@ const TOAST_ICONS: Record<ToastType, string> = {
     success: "check",
 };
 
-const title = computed<string>(() => TOAST_TITLES[props.data?.type ?? ""]);
-const iconClass = computed<string>(() => TOAST_ICONS[props.data?.type ?? ""]);
-const toastClass = computed<string>(() => `toast toast--${props.data?.type ?? ""}`);
+const title = computed<string>(() => TOAST_TITLES[props.data?.type]);
+const iconClass = computed<string>(() => TOAST_ICONS[props.data?.type] ?? "");
+const toastClass = computed<string>(() => `toast toast--${props.data?.type}`);
 
 let timeoutId: number;
 

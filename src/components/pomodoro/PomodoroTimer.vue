@@ -6,12 +6,12 @@ import { addZeroToTime } from "../../utils/dateUtils";
 
 import UIButton from "../ui/UIButton.vue";
 import PomodoroTasks from "./PomodoroTasks.vue";
+import { useConfirmModal } from "../../composables/useConfirmModal";
 
-const props = defineProps({
-    hasTasks: { type: Boolean },
-});
+defineProps({ hasTasks: { type: Boolean } });
 
 const { showToast } = useToast();
+const { setConfirmModal } = useConfirmModal();
 
 const TIME_CONSTANTS = {
     ONE_SECOND: 1000,
@@ -70,9 +70,11 @@ const pausePomodoro = () => {
     timer.paused = true;
 };
 
-const stopPomodoro = () => {
-    if (!confirm("Tem certeza que deseja parar o timer?")) return;
+const confirmStopPomodoro = () => {
+    setConfirmModal("Tem certeza que deseja parar o timer?", stopPomodoro);
+};
 
+const stopPomodoro = () => {
     clearTimer();
     resetTimer();
 };
@@ -158,7 +160,7 @@ const clearTimer = () => {
                 <fa icon="play" /> Continuar
             </UIButton>
 
-            <UIButton variant="danger" @click="stopPomodoro" v-if="timer.active">
+            <UIButton variant="danger" @click="confirmStopPomodoro" v-if="timer.active">
                 <fa icon="circle-stop" /> Parar
             </UIButton>
         </div>

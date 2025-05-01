@@ -1,42 +1,40 @@
 <script setup lang="ts">
 import UIModal from "../ui/UIModal.vue";
 import UIButton from "../ui/UIButton.vue";
+import type { PropType } from "vue";
+import type { ConfirmModalInterface } from "@/interfaces/ConfirmModalInterface";
 
-defineProps({
-    message: {
-        type: String,
+const props = defineProps({
+    modal: {
+        type: Object as PropType<ConfirmModalInterface>,
     },
 });
 
-const emit = defineEmits(["close", "callback"]);
+const emit = defineEmits(["close"]);
 
 const closeShowingModal = () => emit("close");
 const handleCallback = () => {
+    props.modal?.callback && props.modal?.callback();
     emit("close");
-    emit("callback");
 };
 </script>
 
 <template>
-    <Teleport to="#modal">
-        <UIModal titleId="confirm-modal-title" @close="closeShowingModal">
-            <template #title>Confirmar ação</template>
+    <UIModal titleId="confirm-modal-title" @close="closeShowingModal">
+        <template #title>Confirmar ação</template>
 
-            <template #body>
-                <p class="text">{{ message }}</p>
-            </template>
+        <template #body>
+            <p class="text">{{ modal?.message }}</p>
+        </template>
 
-            <template #footer>
-                <div class="btn-group">
-                    <UIButton variant="outline-danger" @click="closeShowingModal">
-                        Cancelar
-                    </UIButton>
+        <template #footer>
+            <div class="btn-group">
+                <UIButton variant="outline-danger" @click="closeShowingModal"> Cancelar </UIButton>
 
-                    <UIButton variant="primary" @click="handleCallback"> Confirmar </UIButton>
-                </div>
-            </template>
-        </UIModal>
-    </Teleport>
+                <UIButton variant="primary" @click="handleCallback"> Confirmar </UIButton>
+            </div>
+        </template>
+    </UIModal>
 </template>
 
 <style scoped>

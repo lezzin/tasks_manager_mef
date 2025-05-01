@@ -11,7 +11,7 @@ import MarkdownEditor from "../utilities/MarkdownEditor.vue";
 import { useTask } from "../../composables/useTask";
 import UIButton from "../ui/UIButton.vue";
 import UIModal from "../ui/UIModal.vue";
-import type { Task } from "@/interfaces/Task.ts";
+import type { Task, TaskPriority } from "@/interfaces/Task.ts";
 
 const emit = defineEmits(["close"]);
 
@@ -32,7 +32,7 @@ const { showToast } = useToast();
 
 const taskName = ref<string>("");
 const taskNameError = ref<string>("");
-const taskPriority = ref<string>(TASK_PRIORITIES.low);
+const taskPriority = ref<TaskPriority>(TASK_PRIORITIES.low);
 const taskDate = ref<string>("");
 const taskDateError = ref<string>("");
 const taskComment = ref<string>("");

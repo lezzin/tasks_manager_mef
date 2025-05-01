@@ -1,39 +1,53 @@
-const PRINCIPAL_DOC_NAME = "users";
-const AI_USAGE_DOC_NAME = "ai_usage";
+import type { TaskPriority, TaskStatus } from "@/interfaces/Task";
 
-const PROJECT_TITLE = "Mentes em Flash";
+const PRINCIPAL_DOC_NAME: string = "users";
+const AI_USAGE_DOC_NAME: string = "ai_usage";
 
-const PAGE_TITLES = {
+const PROJECT_TITLE: string = "Mentes em Flash";
+
+type PageTitles = {
+    login: string;
+    not_found: string;
+    home: {
+        default: string;
+        topic: (topicName: string) => string;
+    };
+    general: string;
+    kanban: string;
+    pomodoro: string;
+};
+
+const PAGE_TITLES: PageTitles = {
     login: `${PROJECT_TITLE} | Acessar sua conta`,
     not_found: `${PROJECT_TITLE} | Página não encontrada`,
     home: {
         default: `${PROJECT_TITLE} | Suas tarefas`,
-        topic: (topicName: string) => `${PROJECT_TITLE} | ${topicName}`,
+        topic: (topicName: string): string => `${PROJECT_TITLE} | ${topicName}`,
     },
     general: `${PROJECT_TITLE} | Visão geral`,
     kanban: `${PROJECT_TITLE} | Kanban`,
     pomodoro: `${PROJECT_TITLE} | Pomodoro`,
 };
 
-const TASK_PRIORITIES = {
-    high: "3",
-    medium: "2",
-    low: "1",
-    completed: "completed",
+const TASK_PRIORITIES: Record<"high" | "medium" | "low" | "completed", TaskPriority> = {
+    completed: 3,
+    high: 3,
+    medium: 2,
+    low: 1,
 };
 
-const TASK_KANBAN_STATUSES = {
+const TASK_KANBAN_STATUSES: Record<TaskStatus, TaskStatus> = {
     todo: "todo",
     doing: "doing",
     completed: "completed",
 };
 
-const TOAST_TIMEOUT = 5000;
+const TOAST_TIMEOUT: number = 5000;
 
-const TOPIC_MAX_LENGTH = 20;
-const TOPIC_MIN_LENGTH = 4;
+const TOPIC_MAX_LENGTH: number = 20;
+const TOPIC_MIN_LENGTH: number = 4;
 
-const GOOGLE_AUTH_ERRORS = {
+const GOOGLE_AUTH_ERRORS: Record<string, string> = {
     "auth/popup-closed-by-user": "O processo de autenticação foi cancelado.",
     "auth/cancelled-popup-request": "Aguarde o processo de autenticação ser concluído.",
     "auth/popup-blocked":
@@ -46,6 +60,7 @@ const GOOGLE_AUTH_ERRORS = {
     "auth/invalid-credential": "As credenciais fornecidas são inválidas ou expiraram.",
     "auth/web-storage-unsupported":
         "O navegador não é compatível com armazenamento da Web necessário para autenticação.",
+    default: "Erro ao logar com o Google. Tente novamente mais tarde.",
 };
 
 export {

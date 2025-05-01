@@ -1,22 +1,25 @@
 <script setup lang="ts">
+import type { Topic } from "@/interfaces/Topic";
+
 import { RouterLink, useRouter } from "vue-router";
 import { inject, markRaw, ref, type PropType } from "vue";
 
 import { useAuthStore } from "../../stores/authStore";
+
+import { useConfirmModal } from "../../composables/useConfirmModal";
 import { useToast } from "../../composables/useToast";
 import { useModal } from "../../composables/useModal";
+import { useTopic } from "../../composables/useTopic";
 
 import TopicFormEdit from "../forms/TopicFormEdit.vue";
 import UIButton from "../ui/UIButton.vue";
-import { useTopic } from "../../composables/useTopic";
 import CreatorLink from "../shared/CreatorLink.vue";
-import type { Topic } from "@/interfaces/Topic";
 
 const emit = defineEmits(["close"]);
 
-const { user } = useAuthStore();
 const { deleteTopic, deleteAllTopics } = useTopic();
 const { showToast } = useToast();
+const { user } = useAuthStore();
 const router = useRouter();
 const modal = useModal();
 
@@ -29,6 +32,8 @@ const props = defineProps({
     },
 });
 
+const { setConfirmModal } = useConfirmModal();
+
 const selectedTopic = inject("selectedTopic") as any;
 const editingTopic = ref<string>("");
 
@@ -40,11 +45,22 @@ const openEditTopicModal = (topicName: string) => {
     modal.showModal();
 };
 
+const confirmTopicRemotion = (topicId: string) => {
+    setConfirmModal(
+        "Tem certeza que deseja excluir esse tópico? Essa ação não poderá ser desfeita!",
+        () => handleDeleteTopic(topicId)
+    );
+};
+
+const confirmAllTopicsRemotion = () => {
+    setConfirmModal(
+        "Tem certeza que deseja excluir TODOS os seus tópicos? Essa ação não poderá ser desfeita!",
+        handleDeleteAllTopics
+    );
+};
+
 const handleDeleteTopic = async (topicId: string) => {
     if (!user?.uid) return;
-
-    if (!confirm("Tem certeza que deseja excluir esse tópico? Essa ação não poderá ser desfeita!"))
-        return;
 
     try {
         await deleteTopic(topicId, user.uid);
@@ -59,13 +75,6 @@ const handleDeleteTopic = async (topicId: string) => {
 
 const handleDeleteAllTopics = async () => {
     if (!user?.uid) return;
-
-    if (
-        !confirm(
-            "Tem certeza que deseja excluir TODOS os seus tópicos? Essa ação não poderá ser desfeita!"
-        )
-    )
-        return;
 
     try {
         await deleteAllTopics(user.uid);
@@ -114,7 +123,11 @@ const handleDeleteAllTopics = async () => {
                     >
                         <fa icon="pen" />
                     </UIButton>
-                    <UIButton isRounded title="Excluir tópico" @click="handleDeleteTopic(topic.id)">
+                    <UIButton
+                        isRounded
+                        title="Excluir tópico"
+                        @click="confirmTopicRemotion(topic.id)"
+                    >
                         <fa icon="trash" />
                     </UIButton>
                 </div>
@@ -154,7 +167,7 @@ const handleDeleteAllTopics = async () => {
             <UIButton
                 title="Excluir todos os tópicos"
                 variant="outline-danger-small"
-                @click="handleDeleteAllTopics"
+                @click="confirmAllTopicsRemotion"
             >
                 <fa icon="trash" />
                 Excluir todos os tópicos

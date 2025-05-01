@@ -7,7 +7,7 @@ import { filterField } from "../utils/stringUtils";
 import { currentTime } from "../utils/dateUtils";
 
 import { useTopic } from "./useTopic";
-import type { Task, TaskAddInterface } from "@/interfaces/Task.ts";
+import type { Task, TaskAddInterface, TaskPriority, TaskStatus } from "@/interfaces/Task.ts";
 
 const { user } = useAuthStore();
 
@@ -126,7 +126,7 @@ const editTask = async (
     taskToUpdate: Task,
     newName: string,
     newComment: string,
-    newPriority: number,
+    newPriority: TaskPriority,
     newDeliveryDate: string,
     userId: string
 ): Promise<void> => {
@@ -163,7 +163,7 @@ const changeStatus = async (taskToUpdate: Task, userId: string): Promise<boolean
 
 const changeKanbanStatus = async (
     taskToUpdate: Task,
-    newKanbanStatus: string,
+    newKanbanStatus: TaskStatus,
     userId: string
 ): Promise<void> => {
     const updatedTask: Task = {

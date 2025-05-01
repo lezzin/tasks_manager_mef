@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GOOGLE_AUTH_ERRORS, PAGE_TITLES } from "../utils/variables.ts.ts";
+import { GOOGLE_AUTH_ERRORS, PAGE_TITLES } from "../utils/variables.ts";
 
 import { ref, watchEffect, onMounted } from "vue";
 import { useRouter } from "vue-router";
@@ -30,8 +30,9 @@ async function loginGoogle() {
     try {
         await signInWithPopup(auth, provider);
         router.push("/");
-    } catch ({ code, message }) {
-        showToast("danger", GOOGLE_AUTH_ERRORS[code] ?? message);
+    } catch (error) {
+        const err = error as Error & { code?: string };
+        showToast("danger", GOOGLE_AUTH_ERRORS[err.code ?? "default"] ?? err.message);
     } finally {
         loading.value = false;
     }

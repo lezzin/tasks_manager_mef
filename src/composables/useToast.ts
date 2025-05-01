@@ -1,7 +1,9 @@
+import type { ToastInterface, ToastType } from "@/interfaces/Toast.ts";
+
 import { reactive } from "vue";
 import { TOAST_TIMEOUT } from "../utils/variables.ts";
 
-const toast = reactive({
+const toast = reactive<ToastInterface>({
     show: false,
     type: "success",
     text: "",
@@ -9,7 +11,7 @@ const toast = reactive({
 
 let timeout: number;
 
-function showToast(type = "success", message: string) {
+function showToast(type: ToastType, message: string) {
     toast.type = type;
     toast.text = message;
     toast.show = true;
@@ -32,3 +34,5 @@ export function useToast() {
         closeToast,
     };
 }
+
+export { type ToastInterface };

@@ -28,12 +28,7 @@ const { modalData, hideConfirmModal } = useConfirmModal();
 
     <Teleport to="#modal">
         <Transition>
-            <ConfirmModal
-                v-if="modalData.show"
-                :message="modalData.message"
-                @close="hideConfirmModal"
-                @callback="modalData.callback"
-            />
+            <ConfirmModal v-if="modalData.show" :modal="modalData" @close="hideConfirmModal" />
         </Transition>
     </Teleport>
 </template>
