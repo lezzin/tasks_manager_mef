@@ -23,15 +23,14 @@ export const useAuthStore = defineStore("auth", () => {
     };
 
     const deleteAccount = async () => {
-        if (!user.value || !auth.currentUser) return;
+        if (!user?.value || !auth.currentUser) return;
 
         try {
             const docRef = doc(db, PRINCIPAL_DOC_NAME, user.value.uid);
-            const promises = [deleteDoc(docRef), deleteUser(auth.currentUser)];
-
-            await Promise.all(promises);
-        } catch (error: any) {
-            throw error;
+            await deleteUser(auth.currentUser);
+            await deleteDoc(docRef);
+        } catch (err) {
+            throw err;
         }
     };
 
