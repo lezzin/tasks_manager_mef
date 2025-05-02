@@ -6,9 +6,9 @@ interface UIDropdownProps {
 }
 
 const props = defineProps<UIDropdownProps>();
-const emit = defineEmits(["trigger"]);
-
-const toggleDropdown = () => emit("trigger");
+const emit = defineEmits<{
+    (e: "trigger"): void;
+}>();
 
 const dropdown = ref(null);
 </script>
@@ -16,7 +16,8 @@ const dropdown = ref(null);
 <template>
     <div class="dropdown">
         <div class="dropdown__trigger">
-            <slot name="trigger" :trigger="toggleDropdown"></slot>
+            '
+            <slot name="trigger" :trigger="emit('trigger')"></slot>
         </div>
 
         <Transition name="dropdown">

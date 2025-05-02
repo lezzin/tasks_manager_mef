@@ -19,7 +19,9 @@ interface TaskFormEditProps {
 }
 
 const props = defineProps<TaskFormEditProps>();
-const emit = defineEmits(["close"]);
+const emit = defineEmits<{
+    (e: "close"): void;
+}>();
 
 const { user } = useAuthStore();
 const { editTask } = useTask();

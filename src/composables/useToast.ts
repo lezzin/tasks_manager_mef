@@ -16,11 +16,11 @@ function showToast(type: ToastType, message: string) {
     toast.text = message;
     toast.show = true;
 
-    // if (timeout) clearTimeout(timeout);
+    if (timeout) clearTimeout(timeout);
 
-    // timeout = setTimeout(() => {
-    //     toast.show = false;
-    // }, TOAST_TIMEOUT);
+    timeout = setTimeout(() => {
+        toast.show = false;
+    }, TOAST_TIMEOUT);
 }
 
 function closeToast() {

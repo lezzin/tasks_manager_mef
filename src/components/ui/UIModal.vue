@@ -8,7 +8,10 @@ interface UIModalProps {
 withDefaults(defineProps<UIModalProps>(), {
     titleId: "modal-title",
 });
-const emit = defineEmits(["close"]);
+
+const emit = defineEmits<{
+    (e: "close"): void;
+}>();
 
 const closeModal = () => emit("close");
 </script>

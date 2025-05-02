@@ -28,7 +28,10 @@ interface geminiSuggestedTaskProps {
 }
 
 const props = defineProps<TaskFormAddProps>();
-const emit = defineEmits(["close"]);
+
+const emit = defineEmits<{
+    (e: "close"): void;
+}>();
 
 const { user } = useAuthStore();
 const { suggestTask, getUsageCount } = useGemini();

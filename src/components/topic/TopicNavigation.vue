@@ -14,15 +14,15 @@ import { useTopic } from "../../composables/useTopic";
 import TopicFormEdit from "../forms/TopicFormEdit.vue";
 import UIButton from "../ui/UIButton.vue";
 import CreatorLink from "../shared/CreatorLink.vue";
-import { useSidebarStore } from "@/stores/sidebarStore";
 
-const emit = defineEmits(["close"]);
+const emit = defineEmits<{
+    (e: "close"): void;
+}>();
 
 const { deleteTopic, deleteAllTopics } = useTopic();
 const { showToast } = useToast();
 const { user } = useAuthStore();
 
-const sidebarStore = useSidebarStore();
 const router = useRouter();
 const modal = useModal();
 
@@ -157,7 +157,6 @@ const handleDeleteAllTopics = async () => {
             <UIButton
                 title="Visualização geral"
                 isLink
-                @click="() => (sidebarStore.isTopicSidebarActive = false)"
                 to="/general"
                 variant="outline-primary-small"
             >

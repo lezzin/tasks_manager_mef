@@ -6,7 +6,9 @@ interface CommentModalProps {
 }
 
 const props = defineProps<CommentModalProps>();
-const emit = defineEmits(["close"]);
+const emit = defineEmits<{
+    (e: "close"): void;
+}>();
 
 const closeShowingComment = () => {
     emit("close");

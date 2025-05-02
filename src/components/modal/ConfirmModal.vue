@@ -8,7 +8,9 @@ interface ConfirmModalProps {
 }
 
 const props = defineProps<ConfirmModalProps>();
-const emit = defineEmits(["close"]);
+const emit = defineEmits<{
+    (e: "close"): void;
+}>();
 
 const closeShowingModal = () => emit("close");
 const handleCallback = () => {

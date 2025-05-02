@@ -8,8 +8,9 @@ export interface TaskStates {
 }
 
 export type TaskStatus = "todo" | "doing" | "completed";
-export type TaskPriority = 1 | 2 | 3 | 4;
 
+export type TaskPriorityString = "high" | "medium" | "low" | "completed"
+export type TaskPriority = 1 | 2 | 3 | 4;
 export interface Task {
     id: string;
     name: string;

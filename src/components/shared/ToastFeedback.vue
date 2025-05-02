@@ -13,7 +13,9 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(["close"]);
+const emit = defineEmits<{
+    (e: "close"): void;
+}>();
 
 const TOAST_TITLES: Record<ToastType, string> = {
     danger: "Oops!",

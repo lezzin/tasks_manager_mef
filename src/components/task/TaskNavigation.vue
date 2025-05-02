@@ -79,21 +79,23 @@ const openTaskComment = async (comment: string) => {
 </script>
 
 <template>
-    <div class="task-nav">
-        <TaskItem
-            v-for="task in props.tasks"
-            :key="task.id"
-            :task="task"
-            @changeStatus="handleChangeTaskStatus"
-            @edit="openEditTaskModal"
-            @openComment="openTaskComment"
-            @delete="confirmTaskRemotion"
-        />
+    <section aria-label="Lista de tarefas filtradas">
+        <div class="task-nav">
+            <TaskItem
+                v-for="task in props.tasks"
+                :key="task.id"
+                :task="task"
+                @changeStatus="handleChangeTaskStatus"
+                @edit="openEditTaskModal"
+                @openComment="openTaskComment"
+                @delete="confirmTaskRemotion"
+            />
 
-        <p class="text text--center" v-if="props.tasks.length === 0">
-            Nenhuma tarefa para esse filtro
-        </p>
-    </div>
+            <p class="text text--center" v-if="props.tasks.length === 0">
+                Nenhuma tarefa para esse filtro
+            </p>
+        </div>
+    </section>
 
     <Teleport to="#modal">
         <Transition>

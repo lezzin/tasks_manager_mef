@@ -5,6 +5,7 @@ import { formatDate } from "@/utils/dateUtils";
 
 import { TASK_PRIORITIES } from "@/utils/variables";
 import { computed } from "vue";
+import { useSidebarStore } from "@/stores/sidebarStore";
 
 interface TaskGeneralProps {
     task: Task;
@@ -12,6 +13,8 @@ interface TaskGeneralProps {
 }
 
 const props = defineProps<TaskGeneralProps>();
+
+const sidebarStore = useSidebarStore();
 
 const link = computed<string>(() => `/topic/${props.task.topicId}?focus=${props.task.id}`);
 const label = computed<string>(
@@ -35,6 +38,7 @@ const label = computed<string>(
         ]"
         role="listitem"
         :to="link"
+        @click="() => (sidebarStore.isTopicSidebarActive = false)"
         title="Acessar tópico {{ task.topicName }}"
         :aria-label="label"
     >

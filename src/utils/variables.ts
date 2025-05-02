@@ -1,4 +1,4 @@
-import type { TaskPriority, TaskStatus } from "@/interfaces/Task";
+import type { TaskPriority, TaskPriorityString, TaskStatus } from "@/interfaces/Task";
 
 const PRINCIPAL_DOC_NAME: string = "users";
 const AI_USAGE_DOC_NAME: string = "ai_usage";
@@ -29,7 +29,7 @@ const PAGE_TITLES: PageTitles = {
     pomodoro: `${PROJECT_TITLE} | Pomodoro`,
 };
 
-const TASK_PRIORITIES: Record<"high" | "medium" | "low" | "completed", TaskPriority> = {
+const TASK_PRIORITIES: Record<TaskPriorityString, TaskPriority> = {
     low: 1,
     medium: 2,
     high: 3,

@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { Task, TaskStatus } from "@/interfaces/Task.ts";
+import type { DragAction, KanbanViewProps, TaskDirection, TaskList } from "@/interfaces/Kanban.ts";
+
 import { PAGE_TITLES, TASK_KANBAN_STATUSES } from "../utils/variables.ts";
-import { getPriorityClass, getPriorityText, getPriorityIcon } from "../utils/priorityUtils.ts";
 
 import { ref, reactive, onMounted } from "vue";
 import { RouterLink, useRouter } from "vue-router";
@@ -13,23 +15,9 @@ import { useSidebarStore } from "../stores/sidebarStore.ts";
 
 import ImageResponsive from "../components/shared/ImageResponsive.vue";
 import UIButton from "../components/ui/UIButton.vue";
-import type { Task, TaskStatus } from "@/interfaces/Task.ts";
-import type { Firestore } from "firebase/firestore";
+import KanbanColumn from "@/components/kanban/KanbanColumn.vue";
 
-type TaskDirection = "prev" | "next";
-type DragAction = "start" | "end";
-
-interface KanbanViewProps {
-    db: Firestore;
-}
-
-interface TaskList {
-    todo: Task[];
-    doing: Task[];
-    completed: Task[];
-}
-
-const props = defineProps<KanbanViewProps>();
+defineProps<KanbanViewProps>();
 
 const tasks = reactive<TaskList>({
     todo: [],
@@ -38,7 +26,7 @@ const tasks = reactive<TaskList>({
 });
 
 const draggedTask = ref<Task | null>(null);
-const activeColumn = ref<string | null>(null);
+const activeColumn = ref<TaskStatus | null>(null);
 const tasksLength = ref<number>(0);
 
 const { showToast } = useToast();
@@ -78,8 +66,9 @@ const organizeTasksByStatus = (userTasks: Task[]) => {
     );
 };
 
-const handleDragEvents = (event: DragEvent, action: DragAction, task: Task | null = null) => {
-    const currentElement = event.target as Element;
+const handleDragEvents = (event?: DragEvent, action?: DragAction, task?: Task | null) => {
+    const currentElement = event?.target as Element;
+    if (!task) return;
 
     if (action === "start") {
         draggedTask.value = task;
@@ -99,15 +88,11 @@ const onDrop = (column: TaskStatus) => {
     activeColumn.value = null;
 };
 
-const onDragEnter = (event: DragEvent, kanbanStatus: string) => {
+const onDragEnter = (event: DragEvent, kanbanStatus: TaskStatus) => {
     if (activeColumn.value !== kanbanStatus) {
         activeColumn.value = kanbanStatus;
     }
 
-    event.preventDefault();
-};
-
-const onDragOver = (event: DragEvent) => {
     event.preventDefault();
 };
 
@@ -133,14 +118,6 @@ const getNewColumn = (currentColumn: TaskStatus, direction: TaskDirection): Task
     return null;
 };
 
-const isFirstColumn = (kanbanStatus: string) => {
-    return kanbanStatus === "todo";
-};
-
-const isLastColumn = (kanbanStatus: string) => {
-    return kanbanStatus === "completed";
-};
-
 const changeTaskColumn = (task: Task, newColumn: TaskStatus) => {
     task.kanbanStatus = newColumn;
 
@@ -162,16 +139,6 @@ const updateTaskStatus = async (taskToUpdate: Task, newKanbanStatus: TaskStatus)
     } catch (error) {
         showToast("danger", `Erro ao atualizar Kanban. Tente novamente mais tarde.`);
     }
-};
-
-const getStatusLabel = (status: string) => {
-    const statuses: Record<string, string> = {
-        todo: "Para fazer",
-        doing: "Em andamento",
-        completed: "Concluído",
-    };
-
-    return statuses[status];
 };
 
 onMounted(() => {
@@ -199,88 +166,15 @@ onMounted(() => {
         <section class="kanban" aria-labelledby="kanban-board">
             <h2 id="kanban-board" class="sr-only">Quadro Kanban de tarefas</h2>
 
-            <div
-                class="kanban__column"
-                v-for="kanbanStatus in kanbanStatuses"
-                :key="kanbanStatus"
-                :class="{ 'drag-over': activeColumn === kanbanStatus }"
-                @drop="onDrop(kanbanStatus)"
-                @dragover="onDragOver"
-                @dragenter="(event) => onDragEnter(event, kanbanStatus)"
-                :data-status="kanbanStatus"
-                role="region"
-                :aria-label="getStatusLabel(kanbanStatus)"
-            >
-                <h3 class="subtitle">
-                    {{ getStatusLabel(kanbanStatus) }}
-                </h3>
-
-                <div class="kanban__tasks" role="list">
-                    <div
-                        class="task task--empty"
-                        v-if="tasks[kanbanStatus].length === 0"
-                        aria-hidden="true"
-                    >
-                        <fa icon="box-open" />
-                        <p class="text text--bold">Nenhuma tarefa na coluna</p>
-                    </div>
-                    <div
-                        v-else
-                        v-for="task in tasks[kanbanStatus]"
-                        :key="task.id"
-                        :class="['task', task.status && 'completed']"
-                        draggable="true"
-                        @dragstart="handleDragEvents($event, 'start', task)"
-                        @dragend="handleDragEvents($event, 'end')"
-                        role="listitem"
-                        :aria-labelledby="'task-' + task.id"
-                    >
-                        <p id="task-topic-{{ task.id }}" class="text text--small text--muted">
-                            {{ task.topicName }}
-                        </p>
-
-                        <RouterLink
-                            class="text text--bold truncate"
-                            :to="'/topic/' + task.topicId"
-                            style="--line-clamp: 1"
-                            :aria-labelledby="'task-' + task.id"
-                        >
-                            <span :id="'task-' + task.id">{{ task.name }}</span>
-                        </RouterLink>
-
-                        <span
-                            :class="['tag', getPriorityClass(task.priority)]"
-                            :aria-label="getPriorityText(task.priority)"
-                        >
-                            <fa :icon="getPriorityIcon(task.priority)" />
-                            {{ getPriorityText(task.priority) }}
-                        </span>
-
-                        <div class="task__navigation">
-                            <UIButton
-                                variant="outline-primary-small"
-                                @click="moveTask(task, 'prev')"
-                                :disabled="isFirstColumn(kanbanStatus)"
-                                :aria-disabled="isFirstColumn(kanbanStatus)"
-                                title="Mover tarefa para a coluna anterior"
-                            >
-                                <fa icon="caret-left" />
-                                Anterior
-                            </UIButton>
-                            <UIButton
-                                variant="outline-primary-small"
-                                @click="moveTask(task, 'next')"
-                                :disabled="isLastColumn(kanbanStatus)"
-                                :aria-disabled="isLastColumn(kanbanStatus)"
-                                title="Mover tarefa para a próxima coluna"
-                            >
-                                Próximo
-                                <fa icon="caret-right" />
-                            </UIButton>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <KanbanColumn
+                :active-column="activeColumn"
+                :tasks="tasks"
+                :kanban-statuses="kanbanStatuses"
+                @dragEvents="handleDragEvents"
+                @onDrop="onDrop"
+                @onDragEnter="onDragEnter"
+                @moveTask="moveTask"
+            />
         </section>
     </div>
     <div class="container" v-else>
@@ -335,93 +229,6 @@ onMounted(() => {
         display: grid;
         grid-template-columns: repeat(3, minmax(300px, 1fr));
         gap: 1rem;
-
-        .kanban__column {
-            border: 1px dashed transparent;
-            min-height: 70dvh;
-
-            &.drag-over > .subtitle {
-                border-bottom-color: var(--details-color);
-            }
-
-            > .subtitle {
-                border-bottom: 3px solid transparent;
-                margin-bottom: 0.6rem;
-                position: sticky;
-                font-size: 1.4rem;
-                top: calc(10vh - 1px);
-                padding: 1rem var(--padding);
-                background-color: var(--bg-secondary);
-                z-index: 1;
-                transition: border-bottom-color var(--screen-transition) ease;
-
-                @media (width<=768px) {
-                    top: 0;
-                }
-            }
-
-            .kanban__tasks {
-                border: 1px solid transparent;
-                border-radius: var(--radius);
-                display: flex;
-                flex-direction: column;
-                gap: 1rem;
-                padding-inline: var(--padding);
-
-                .task {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: 1rem;
-                    border: 1px solid var(--border-color);
-                    padding: 1.4rem var(--padding);
-                    border-radius: var(--radius);
-                    background-color: transparent;
-                    transition: all 0.3s ease;
-                    cursor: move;
-
-                    &.dragging {
-                        border-style: dashed;
-                        opacity: 0.6;
-                    }
-
-                    &:not(.task--empty) {
-                        box-shadow: var(--shadow-sm);
-                    }
-
-                    &.task--empty {
-                        cursor: not-allowed;
-                        align-items: center;
-                        justify-content: center;
-                        border-style: dashed;
-                        font-size: 1.8rem;
-                        gap: 0.5rem;
-                        padding: 3.1879rem 0;
-                    }
-
-                    a.text {
-                        text-decoration: none;
-                    }
-
-                    .tag {
-                        border-radius: calc(var(--radius) * 2);
-                    }
-
-                    .task__navigation {
-                        display: none;
-                        justify-content: space-between;
-                        align-items: center;
-                        margin-top: 1.5rem;
-                        gap: 0.5rem;
-                        width: 100%;
-
-                        @media (width<=768px) {
-                            display: flex;
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 </style>

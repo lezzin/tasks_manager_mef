@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import type { Task, TaskPriority, TaskStates } from "@/interfaces/Task.ts";
+import type { Task, TaskPriority, TaskPriorityString, TaskStates } from "@/interfaces/Task.ts";
 import type { Firestore } from "firebase/firestore";
 
 import { PAGE_TITLES, TASK_PRIORITIES } from "../utils/variables.ts";
 
 import { ref, reactive, onMounted, computed } from "vue";
-import { useRouter } from "vue-router";
 
 import domtoimage from "dom-to-image-more";
 import { saveAs } from "file-saver";
@@ -16,17 +15,15 @@ import { useAuthStore } from "../stores/authStore.ts";
 import { useLoadingStore } from "../stores/loadingStore.ts";
 import { useSidebarStore } from "../stores/sidebarStore.ts";
 
-import UIButton from "../components/ui/UIButton.vue";
-
 import TaskGeneral from "@/components/task/TaskGeneral.vue";
-import GeneralLegend from "@/components/general/GeneralLegend.vue";
+import GeneralHeader from "@/components/general/GeneralHeader.vue";
+import GeneralLegendItem from "@/components/general/GeneralLegendItem.vue";
 
 const { showToast } = useToast();
 const { getUserTasksWithTopic } = useTask();
 const { user } = useAuthStore();
 const sidebarStore = useSidebarStore();
 const loadingStore = useLoadingStore();
-const router = useRouter();
 
 interface GeneralViewProps {
     db: Firestore;
@@ -102,20 +99,17 @@ const removeFocusFromTasks = () => {
     });
 };
 
+const setPriorityCount = (priority: TaskPriorityString) => {
+    priorityCount[priority] = allUserTasks.value.filter(
+        (task) => task.priority == TASK_PRIORITIES[priority]
+    ).length;
+};
+
 const updatePriorityCounter = () => {
-    priorityCount.completed = allUserTasks.value.filter((task) => !!task.status).length;
-
-    priorityCount.high = allUserTasks.value.filter(
-        (task) => task.priority == TASK_PRIORITIES.high
-    ).length;
-
-    priorityCount.medium = allUserTasks.value.filter(
-        (task) => task.priority == TASK_PRIORITIES.medium
-    ).length;
-
-    priorityCount.low = allUserTasks.value.filter(
-        (task) => task.priority == TASK_PRIORITIES.low
-    ).length;
+    setPriorityCount("completed");
+    setPriorityCount("high");
+    setPriorityCount("medium");
+    setPriorityCount("low");
 };
 
 const loadTasks = async () => {
@@ -142,38 +136,12 @@ onMounted(() => {
 
 <template>
     <div class="task-view container" v-if="allUserTasks.length > 0" ref="container">
-        <header class="task-view__header" role="banner">
-            <h2 class="title" v-if="!isDownloading">
-                Visualize as suas tarefas de uma maneira geral
-            </h2>
-
-            <div class="task-view__header-buttons" v-if="!isDownloading">
-                <UIButton
-                    type="button"
-                    @click="downloadAsImage"
-                    variant="primary"
-                    isIcon
-                    title="Baixar todas as tarefas em PDF"
-                >
-                    <fa icon="download" />
-                    <span class="sr-only">Baixar tarefas</span>
-                </UIButton>
-                <UIButton
-                    @click="() => router.back()"
-                    variant="outline-primary"
-                    isIcon
-                    title="Voltar para a página anterior"
-                >
-                    <fa icon="arrow-left" />
-                    <span class="sr-only">Voltar</span>
-                </UIButton>
-            </div>
-        </header>
+        <GeneralHeader @download="downloadAsImage" :isDownloading="isDownloading" />
 
         <section class="legend" aria-labelledby="task-legend">
             <h3 id="task-legend" class="sr-only">Legenda de prioridade de tarefas</h3>
 
-            <GeneralLegend
+            <GeneralLegendItem
                 v-for="(legend, index) in legendsData"
                 :key="index"
                 :counter="legend.counter"
@@ -202,27 +170,6 @@ onMounted(() => {
 .task-view {
     padding: var(--padding) var(--padding) calc(var(--padding) * 5);
     background: var(--bg-secondary);
-
-    .task-view__header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        text-align: center;
-        height: 4.876vh;
-
-        @media (width <=768px) {
-            flex-direction: column;
-            padding-top: var(--padding);
-            gap: 1rem;
-            height: auto;
-        }
-
-        .task-view__header-buttons {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-    }
 
     .legend {
         display: grid;

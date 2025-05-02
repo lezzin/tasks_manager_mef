@@ -8,21 +8,13 @@ import { useRouter } from "vue-router";
 
 import PomodoroTimer from "../components/pomodoro/PomodoroTimer.vue";
 import PomodoroInformation from "../components/pomodoro/PomodoroInformation.vue";
-import UIButton from "../components/ui/UIButton.vue";
+import PomodoroHeader from "@/components/pomodoro/PomodoroHeader.vue";
 
 const { checkUserTasks } = useTask();
 const loadingStore = useLoadingStore();
 const sidebarStore = useSidebarStore();
-const router = useRouter();
 
 const hasAnyTask = ref(false);
-
-const goToHelp = () => {
-    window.scroll({
-        top: document.querySelector("#s-help" as any).getBoundingClientRect().top + window.scrollY,
-        behavior: "smooth",
-    });
-};
 
 onMounted(async () => {
     sidebarStore.setShowSidebarToggler(false);
@@ -34,21 +26,7 @@ onMounted(async () => {
 <template>
     <section class="pomodoro-wrapper" id="s-pomodoro">
         <div class="container">
-            <div class="pomodoro__absolute">
-                <UIButton
-                    @click="() => router.back()"
-                    variant="outline-primary"
-                    title="Voltar para a página anterior"
-                >
-                    <fa icon="arrow-left" />
-                    <span>Voltar</span>
-                </UIButton>
-
-                <UIButton variant="outline-primary" isIcon title="Acessar ajuda" @click="goToHelp">
-                    <fa icon="circle-question" />
-                </UIButton>
-            </div>
-
+            <PomodoroHeader />
             <PomodoroTimer :hasTasks="hasAnyTask" />
         </div>
     </section>
@@ -75,19 +53,6 @@ onMounted(async () => {
     display: grid;
     place-items: center;
     min-height: 100vh;
-}
-
-.pomodoro__absolute {
-    position: absolute;
-    top: 1.5rem;
-    right: var(--padding);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.pomodoro__absolute button {
-    padding: 0.74rem 1rem;
 }
 
 .information-wrapper {

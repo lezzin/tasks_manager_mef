@@ -16,7 +16,10 @@ const priorities: Record<string, string> = {
 };
 
 defineProps<GeneralLegendProps>();
-const emit = defineEmits(["focus", "unfocus"]);
+const emit = defineEmits<{
+    (e: "focus"): void;
+    (e: "unfocus"): void;
+}>();
 </script>
 
 <template>

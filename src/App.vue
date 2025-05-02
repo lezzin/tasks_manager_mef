@@ -11,8 +11,6 @@ import MyHeader from "./components/layout/MyHeader.vue";
 
 const { toast, closeToast, showToast } = useToast();
 const { modalData, hideConfirmModal } = useConfirmModal();
-
-showToast("success", "Tarefa adicionada com sucesso.");
 </script>
 
 <template>

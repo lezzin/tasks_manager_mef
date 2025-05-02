@@ -16,7 +16,9 @@ interface TopicFormEditProps {
 }
 
 const props = defineProps<TopicFormEditProps>();
-const emit = defineEmits(["close"]);
+const emit = defineEmits<{
+    (e: "close"): void;
+}>();
 
 const oldName = ref<string>("");
 const name = ref<string>("");

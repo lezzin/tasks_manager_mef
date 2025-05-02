@@ -3,7 +3,7 @@ import { type ComputedRef } from "vue";
 import type { Task, TaskStatus } from "@/interfaces/Task";
 import type { Topic } from "@/interfaces/Topic.ts";
 
-import { PRINCIPAL_DOC_NAME, PAGE_TITLES, TASK_KANBAN_STATUSES } from "../utils/variables.ts";
+import { PRINCIPAL_DOC_NAME, PAGE_TITLES } from "../utils/variables.ts";
 
 import { onMounted, provide, reactive, ref, computed, watch, markRaw, type PropType } from "vue";
 import { doc, Firestore, onSnapshot } from "firebase/firestore";
@@ -21,6 +21,7 @@ import TaskFormAdd from "../components/forms/TaskFormAdd.vue";
 import ImageResponsive from "../components/shared/ImageResponsive.vue";
 import UIButton from "../components/ui/UIButton.vue";
 import MySidebar from "@/components/layout/MySidebar.vue";
+import TaskFilter from "@/components/task/TaskFilter.vue";
 
 interface HomeViewProps {
     db: Firestore;
@@ -38,6 +39,12 @@ const { user } = useAuthStore();
 const loadingStore = useLoadingStore();
 const sidebarStore = useSidebarStore();
 
+const STATUS_ORDER: Record<TaskStatus, number> = {
+    todo: 1,
+    doing: 2,
+    completed: 3,
+};
+
 const topics = reactive<{ data: Topic[] | null }>({ data: [] });
 const route = useRoute();
 const router = useRouter();
@@ -45,10 +52,20 @@ const router = useRouter();
 const filterTask = ref("all");
 const searchTask = ref("");
 
-const STATUS_ORDER: Record<TaskStatus, number> = {
-    todo: 1,
-    doing: 2,
-    completed: 3,
+const handleFilter = (value: string) => {
+    filterTask.value = value;
+
+    if (value !== "all") {
+        searchTask.value = "";
+    }
+};
+
+const handleSearch = (value: string) => {
+    searchTask.value = value;
+
+    if (value.trim()) {
+        filterTask.value = "all";
+    }
 };
 
 const filteredTasks: ComputedRef<Task[]> = computed(() => {
@@ -77,18 +94,6 @@ const filteredTasks: ComputedRef<Task[]> = computed(() => {
 
         return taskA.name.localeCompare(taskB.name);
     });
-});
-
-watch(searchTask, (newValue) => {
-    if (newValue.trim()) {
-        filterTask.value = "all";
-    }
-});
-
-watch(filterTask, (newValue) => {
-    if (newValue !== "all") {
-        searchTask.value = "";
-    }
 });
 
 const loadTopicTasks = (topicId: string) => {
@@ -225,66 +230,16 @@ provide("selectedTopic", selectedTopic);
             </div>
 
             <div v-if="defaultTasks.length > 0">
-                <header class="task-container__header" role="banner">
-                    <form @submit.prevent aria-labelledby="search-task-label">
-                        <div class="form-group">
-                            <label for="search-task" id="search-task-label" class="text"
-                                >Pesquisar</label
-                            >
-                            <div class="input-group">
-                                <input
-                                    type="text"
-                                    id="search-task"
-                                    placeholder="Descrição da tarefa"
-                                    v-model="searchTask"
-                                    autocomplete="off"
-                                    aria-describedby="search-task-help"
-                                />
-
-                                <span id="search-task-help" class="sr-only">
-                                    Digite a descrição da tarefa para buscar
-                                </span>
-
-                                <UIButton type="submit" title="Pesquisar tarefa">
-                                    <fa icon="search" />
-                                    <span class="sr-only">Pesquisar</span>
-                                </UIButton>
-                            </div>
-                        </div>
-                    </form>
-
-                    <form @submit.prevent aria-labelledby="filter-task-label">
-                        <div class="form-group">
-                            <label for="filter-task" id="filter-task-label" class="text"
-                                >Filtrar</label
-                            >
-                            <div class="select">
-                                <select
-                                    id="filter-task"
-                                    v-model="filterTask"
-                                    aria-describedby="filter-task-help"
-                                >
-                                    <option value="all">Todas</option>
-                                    <option value="completed">Concluídas</option>
-                                    <option value="not-completed">Não concluídas</option>
-                                </select>
-                                <span id="filter-task-help" class="sr-only"
-                                    >Escolha um filtro para as tarefas</span
-                                >
-                            </div>
-                        </div>
-                    </form>
-                </header>
+                <TaskFilter
+                    @filter="handleFilter"
+                    @search="handleSearch"
+                    :filterTask="filterTask"
+                    :searchTask="searchTask"
+                />
 
                 <span class="divider" role="separator" aria-hidden="true"></span>
 
-                <section aria-label="Lista de tarefas filtradas">
-                    <TaskNavigation
-                        :topic="selectedTopic.name"
-                        :tasks="filteredTasks"
-                    ></TaskNavigation>
-                    />
-                </section>
+                <TaskNavigation :topic="selectedTopic.name" :tasks="filteredTasks" />
             </div>
             <div v-else class="image-centered" aria-live="polite" aria-atomic="true">
                 <ImageResponsive
@@ -372,20 +327,5 @@ provide("selectedTopic", selectedTopic);
 
 .task-container {
     padding: var(--padding) 0;
-
-    .task-container__header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        gap: 1rem;
-
-        @media (width <=768px) {
-            flex-wrap: wrap;
-
-            form {
-                width: 100%;
-            }
-        }
-    }
 }
 </style>

@@ -7,6 +7,7 @@ export function getPriorityClass(priority: TaskPriority): string {
             [TASK_PRIORITIES.high]: "priority-high",
             [TASK_PRIORITIES.medium]: "priority-medium",
             [TASK_PRIORITIES.low]: "priority-low",
+            [TASK_PRIORITIES.completed]: "completed",
         }[priority] ?? ""
     );
 }
