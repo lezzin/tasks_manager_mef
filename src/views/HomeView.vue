@@ -18,10 +18,9 @@ import { useTopic } from "../composables/useTopic";
 
 import TaskNavigation from "../components/task/TaskNavigation.vue";
 import TaskFormAdd from "../components/forms/TaskFormAdd.vue";
-import TopicFormAdd from "../components/forms/TopicFormAdd.vue";
-import TopicNavigation from "../components/topic/TopicNavigation.vue";
 import ImageResponsive from "../components/shared/ImageResponsive.vue";
 import UIButton from "../components/ui/UIButton.vue";
+import MySidebar from "@/components/layout/MySidebar.vue";
 
 interface HomeViewProps {
     db: Firestore;
@@ -29,7 +28,6 @@ interface HomeViewProps {
 
 const props = defineProps<HomeViewProps>();
 
-const aside = ref(null);
 const selectedTopic = ref<Topic | null>(null);
 const defaultTasks = ref<Task[]>([]);
 
@@ -47,18 +45,10 @@ const router = useRouter();
 const filterTask = ref("all");
 const searchTask = ref("");
 
-const taskToFocus = computed(() => (route.query.focus as string) || "");
-
 const STATUS_ORDER: Record<TaskStatus, number> = {
     todo: 1,
     doing: 2,
     completed: 3,
-};
-
-const FILTER_ORDERS = {
-    all: TASK_KANBAN_STATUSES.completed,
-    completed: TASK_KANBAN_STATUSES.todo || TASK_KANBAN_STATUSES.doing,
-    "not-completed": TASK_KANBAN_STATUSES.todo || TASK_KANBAN_STATUSES.doing,
 };
 
 const filteredTasks: ComputedRef<Task[]> = computed(() => {
@@ -292,7 +282,6 @@ provide("selectedTopic", selectedTopic);
                     <TaskNavigation
                         :topic="selectedTopic.name"
                         :tasks="filteredTasks"
-                        :focus="taskToFocus"
                     ></TaskNavigation>
                     />
                 </section>
@@ -326,32 +315,10 @@ provide("selectedTopic", selectedTopic);
         </Transition>
     </Teleport>
 
-    <Transition name="slide">
-        <nav
-            class="home-aside"
-            aria-label="Navegação de tópicos"
-            v-if="sidebarStore.isTopicSidebarActive"
-            ref="aside"
-        >
-            <TopicFormAdd />
-            <span class="divider" role="separator" aria-hidden="true"></span>
-            <TopicNavigation :data="topics.data" @close="sidebarStore.closeSidebar" />
-        </nav>
-    </Transition>
+    <MySidebar :data="topics.data" />
 </template>
 
 <style scoped>
-.slide-enter-active,
-.slide-leave-active {
-    transition: all var(--screen-transition) ease;
-}
-
-.slide-enter-from,
-.slide-leave-to {
-    transform: translateX(-100%);
-    opacity: 0;
-}
-
 .container {
     position: relative;
 }

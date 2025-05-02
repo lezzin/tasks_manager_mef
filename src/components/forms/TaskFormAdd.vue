@@ -19,6 +19,12 @@ import type { TaskAddInterface, TaskPriority } from "@/interfaces/Task.ts";
 interface TaskFormAddProps {
     topicId?: string;
     topicName?: string;
+    id: string;
+}
+
+interface geminiSuggestedTaskProps {
+    data: SuggestionResponse | null;
+    usageRemaining: number | null;
 }
 
 const props = defineProps<TaskFormAddProps>();
@@ -32,13 +38,11 @@ const { addTask, getUserTasksByTopic } = useTask();
 const filterTask = inject("filterTask") as any;
 const searchTask = inject("searchTask") as any;
 
-const geminiSuggestedTask = reactive<{
-    data: null | SuggestionResponse;
-    usageRemaining: number | null;
-}>({
+const geminiSuggestedTask = reactive<geminiSuggestedTaskProps>({
     data: null,
     usageRemaining: null,
 });
+
 const isGeminiDropdownActive = ref(false);
 const isRequestingGemini = ref(false);
 

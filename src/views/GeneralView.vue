@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { PAGE_TITLES, TASK_PRIORITIES } from "../utils/variables.ts";
-import { getPriorityIcon } from "../utils/priorityUtils.ts";
+import type { Task, TaskPriority, TaskStates } from "@/interfaces/Task.ts";
+import type { Firestore } from "firebase/firestore";
 
-import { ref, reactive, onMounted } from "vue";
+import { PAGE_TITLES, TASK_PRIORITIES } from "../utils/variables.ts";
+
+import { ref, reactive, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 
 import domtoimage from "dom-to-image-more";
@@ -15,9 +17,9 @@ import { useLoadingStore } from "../stores/loadingStore.ts";
 import { useSidebarStore } from "../stores/sidebarStore.ts";
 
 import UIButton from "../components/ui/UIButton.vue";
-import type { Task, TaskPriority, TaskStates } from "@/interfaces/Task.ts";
-import type { Firestore } from "firebase/firestore";
+
 import TaskGeneral from "@/components/task/TaskGeneral.vue";
+import GeneralLegend from "@/components/general/GeneralLegend.vue";
 
 const { showToast } = useToast();
 const { getUserTasksWithTopic } = useTask();
@@ -41,8 +43,35 @@ const priorityCount = reactive({
     completed: 0,
     high: 0,
     medium: 0,
-    small: 0,
+    low: 0,
 });
+
+const legendsData = computed(() => [
+    {
+        counter: priorityCount.completed,
+        priority: TASK_PRIORITIES.completed,
+        label: "Concluída",
+        priorityClass: "completed",
+    },
+    {
+        counter: priorityCount.high,
+        priority: TASK_PRIORITIES.high,
+        label: "Alta prioridade",
+        priorityClass: "priority-high",
+    },
+    {
+        counter: priorityCount.medium,
+        priority: TASK_PRIORITIES.medium,
+        label: "Média prioridade",
+        priorityClass: "priority-medium",
+    },
+    {
+        counter: priorityCount.low,
+        priority: TASK_PRIORITIES.low,
+        label: "Baixa prioridade",
+        priorityClass: "priority-low",
+    },
+]);
 
 const downloadAsImage = () => {
     isDownloading.value = true;
@@ -84,7 +113,7 @@ const updatePriorityCounter = () => {
         (task) => task.priority == TASK_PRIORITIES.medium
     ).length;
 
-    priorityCount.small = allUserTasks.value.filter(
+    priorityCount.low = allUserTasks.value.filter(
         (task) => task.priority == TASK_PRIORITIES.low
     ).length;
 };
@@ -143,54 +172,17 @@ onMounted(() => {
 
         <section class="legend" aria-labelledby="task-legend">
             <h3 id="task-legend" class="sr-only">Legenda de prioridade de tarefas</h3>
-            <div
-                class="legend__item completed"
-                @mouseover="focusTasksByPriority(TASK_PRIORITIES.completed)"
-                @mouseleave="removeFocusFromTasks"
-                aria-label="Tarefas concluídas: {{ priorityCount.completed }}"
-                tabindex="0"
-            >
-                <p class="text text--small">
-                    <fa :icon="getPriorityIcon(TASK_PRIORITIES.completed)" />
-                    Concluídas ({{ priorityCount.completed }})
-                </p>
-            </div>
-            <div
-                class="legend__item priority-high"
-                @mouseover="focusTasksByPriority(TASK_PRIORITIES.high)"
-                @mouseleave="removeFocusFromTasks"
-                :aria-label="`Tarefas de alta prioridade: ${priorityCount.high}`"
-                tabindex="0"
-            >
-                <p class="text text--small">
-                    <fa :icon="getPriorityIcon(TASK_PRIORITIES.high)" />
-                    Alta prioridade ({{ priorityCount.high }})
-                </p>
-            </div>
-            <div
-                class="legend__item priority-medium"
-                @mouseover="focusTasksByPriority(TASK_PRIORITIES.medium)"
-                @mouseleave="removeFocusFromTasks"
-                :aria-label="`Tarefas de média prioridade: ${priorityCount.medium}`"
-                tabindex="0"
-            >
-                <p class="text text--small">
-                    <fa :icon="getPriorityIcon(TASK_PRIORITIES.medium)" />
-                    Média prioridade ({{ priorityCount.medium }})
-                </p>
-            </div>
-            <div
-                class="legend__item priority-low"
-                @mouseover="focusTasksByPriority(TASK_PRIORITIES.low)"
-                @mouseleave="removeFocusFromTasks"
-                :aria-label="`Tarefas de baixa prioridade: ${priorityCount.small}`"
-                tabindex="0"
-            >
-                <p class="text text--small">
-                    <fa :icon="getPriorityIcon(TASK_PRIORITIES.low)" />
-                    Baixa prioridade ({{ priorityCount.small }})
-                </p>
-            </div>
+
+            <GeneralLegend
+                v-for="(legend, index) in legendsData"
+                :key="index"
+                :counter="legend.counter"
+                :priority="legend.priority"
+                :label="legend.label"
+                :priorityClass="legend.priorityClass"
+                @focus="focusTasksByPriority(legend.priority)"
+                @unfocus="removeFocusFromTasks"
+            />
         </section>
 
         <span class="divider" role="separator" aria-hidden="true"></span>

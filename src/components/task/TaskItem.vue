@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { Task } from "@/interfaces/Task";
+import { computed, onMounted, ref, useAttrs } from "vue";
 
-import { onMounted, ref, useAttrs } from "vue";
 import { getPriorityClass, getPriorityIcon, getPriorityText } from "../../utils/priorityUtils";
 import { formatDate } from "../../utils/dateUtils";
+import { useRoute, useRouter, type LocationQueryRaw } from "vue-router";
 
 import UIButton from "../ui/UIButton.vue";
 
@@ -15,7 +16,6 @@ interface TaskItemProps {
     showComments?: boolean;
     showCompletedStatus?: boolean;
     variant?: string;
-    focus: boolean;
 }
 
 const props = withDefaults(defineProps<TaskItemProps>(), {
@@ -25,11 +25,13 @@ const props = withDefaults(defineProps<TaskItemProps>(), {
     showComments: true,
     showCompletedStatus: true,
     variant: "normal",
-    focus: false,
 });
 
 const emit = defineEmits(["changeStatus", "openComment", "edit", "delete"]);
+
 const attrs = useAttrs();
+const route = useRoute();
+const router = useRouter();
 
 const changeTaskStatus = (task: Task) => emit("changeStatus", task);
 const openTaskComment = (comment: string) => emit("openComment", comment);
@@ -38,16 +40,18 @@ const deleteTask = (task: Task) => emit("delete", task);
 
 const FOCUS_TIMEOUT = 2000;
 
-const allTaskClasses = [
-    "task",
-    props.task.status && props.showCompletedStatus ? "completed" : "",
-    props.focus ? "task--focus" : "",
-];
+const queryFocus = computed(() => (route.query.focus as string) || null);
+const canFocus = computed(() => props.task.id === queryFocus.value);
 
+const allTaskClasses = ["task", props.task.status && props.showCompletedStatus ? "completed" : ""];
 const classes = ref(allTaskClasses.join(" "));
 
 const focusOnTask = () => {
-    if (!props.focus) return;
+    if (!canFocus.value) return;
+
+    allTaskClasses.push("task--focus");
+    classes.value = allTaskClasses.join(" ");
+    router.replace({ query: {} });
 
     setTimeout(() => {
         allTaskClasses.pop();
@@ -139,7 +143,9 @@ onMounted(focusOnTask);
 }
 
 .task--focus {
-    box-shadow: 0 0 1rem #000;
+    box-shadow: var(--shadow-md);
+    border-color: var(--details-color);
+    background-color: var(--details-color-light-2);
 }
 
 .task.smaller {

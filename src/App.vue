@@ -9,8 +9,10 @@ import ConfirmModal from "./components/modal/ConfirmModal.vue";
 import ToastFeedback from "./components/shared/ToastFeedback.vue";
 import MyHeader from "./components/layout/MyHeader.vue";
 
-const { toast, closeToast } = useToast();
+const { toast, closeToast, showToast } = useToast();
 const { modalData, hideConfirmModal } = useConfirmModal();
+
+showToast("success", "Tarefa adicionada com sucesso.");
 </script>
 
 <template>

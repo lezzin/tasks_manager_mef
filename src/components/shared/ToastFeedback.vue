@@ -6,11 +6,13 @@ import { computed, onMounted, onBeforeUnmount, type PropType } from "vue";
 
 import UIButton from "../ui/UIButton.vue";
 
-interface ToastFeedbackProps {
-    data: ToastInterface;
-}
+const props = defineProps({
+    data: {
+        type: Object as PropType<ToastInterface>,
+        required: true,
+    },
+});
 
-const props = defineProps<ToastFeedbackProps>();
 const emit = defineEmits(["close"]);
 
 const TOAST_TITLES: Record<ToastType, string> = {
@@ -79,7 +81,6 @@ function closeToast() {
     right: 2rem;
     display: grid;
     grid-template-columns: 1.5rem 1fr;
-    border: 1px solid var(--border-color);
     box-shadow: var(--shadow-md);
     background-color: var(--bg-primary);
     border-radius: var(--radius);
@@ -113,6 +114,8 @@ function closeToast() {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border: 1px solid var(--border-color);
+    border-left: none;
     gap: 2rem;
     padding: 1rem 1.5rem;
 }
