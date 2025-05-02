@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { PAGE_TITLES, TASK_PRIORITIES } from "../utils/variables.ts";
-import { getPriorityClass, getPriorityText, getPriorityIcon } from "../utils/priorityUtils.ts";
-import { formatDate } from "../utils/dateUtils.ts";
+import { getPriorityIcon } from "../utils/priorityUtils.ts";
 
 import { ref, reactive, onMounted } from "vue";
-import { RouterLink, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 
 import domtoimage from "dom-to-image-more";
 import { saveAs } from "file-saver";
-import { marked } from "marked";
 
 import { useToast } from "../composables/useToast.ts";
 import { useTask } from "../composables/useTask.ts";
@@ -16,9 +14,10 @@ import { useAuthStore } from "../stores/authStore.ts";
 import { useLoadingStore } from "../stores/loadingStore.ts";
 import { useSidebarStore } from "../stores/sidebarStore.ts";
 
-import ImageResponsive from "../components/shared/ImageResponsive.vue";
 import UIButton from "../components/ui/UIButton.vue";
-import type { Task } from "@/interfaces/Task.ts";
+import type { Task, TaskPriority, TaskStates } from "@/interfaces/Task.ts";
+import type { Firestore } from "firebase/firestore";
+import TaskGeneral from "@/components/task/TaskGeneral.vue";
 
 const { showToast } = useToast();
 const { getUserTasksWithTopic } = useTask();
@@ -27,15 +26,15 @@ const sidebarStore = useSidebarStore();
 const loadingStore = useLoadingStore();
 const router = useRouter();
 
-defineProps(["db"]);
+interface GeneralViewProps {
+    db: Firestore;
+}
+
+defineProps<GeneralViewProps>();
 
 const isDownloading = ref(false);
-
-// Store tasks as an array of Task objects
 const allUserTasks = ref<Task[]>([]);
-
-// Track hover and focus states for each task by task ID
-const taskStates = reactive<{ [key: string]: { isHovering: boolean; isFocused: boolean } }>({});
+const taskStates = reactive<TaskStates>({});
 
 const container = ref(null);
 const priorityCount = reactive({
@@ -55,19 +54,16 @@ const downloadAsImage = () => {
         .finally(() => (isDownloading.value = false));
 };
 
-// Focus tasks by priority
-const focusTasksByPriority = (priority: string) => {
+const focusTasksByPriority = (priority: TaskPriority) => {
     allUserTasks.value.forEach((task) => {
         taskStates[task.id] = {
             isHovering: true,
             isFocused:
-                task.priority === priority ||
-                (priority === TASK_PRIORITIES.completed && task.status),
+                task.priority == priority || (priority == TASK_PRIORITIES.completed && task.status),
         };
     });
 };
 
-// Remove focus from all tasks
 const removeFocusFromTasks = () => {
     allUserTasks.value.forEach((task) => {
         taskStates[task.id] = {
@@ -77,23 +73,19 @@ const removeFocusFromTasks = () => {
     });
 };
 
-const formatComment = (comment: string) => {
-    return marked.parse(comment, {
-        gfm: true,
-        breaks: true,
-    });
-};
-
 const updatePriorityCounter = () => {
     priorityCount.completed = allUserTasks.value.filter((task) => !!task.status).length;
+
     priorityCount.high = allUserTasks.value.filter(
-        (task) => task.priority === TASK_PRIORITIES.high
+        (task) => task.priority == TASK_PRIORITIES.high
     ).length;
+
     priorityCount.medium = allUserTasks.value.filter(
-        (task) => task.priority === TASK_PRIORITIES.medium
+        (task) => task.priority == TASK_PRIORITIES.medium
     ).length;
+
     priorityCount.small = allUserTasks.value.filter(
-        (task) => task.priority === TASK_PRIORITIES.low
+        (task) => task.priority == TASK_PRIORITIES.low
     ).length;
 };
 
@@ -204,51 +196,12 @@ onMounted(() => {
         <span class="divider" role="separator" aria-hidden="true"></span>
 
         <div class="grid" role="list" aria-label="Lista de tarefas">
-            <RouterLink
-                :class="[
-                    'grid__item',
-                    'task',
-                    task.status && TASK_PRIORITIES.completed,
-                    {
-                        'task--hovering': taskStates[task.id]?.isHovering,
-                        'task--focused': taskStates[task.id]?.isFocused,
-                    },
-                ]"
+            <TaskGeneral
                 v-for="task in allUserTasks"
                 :key="task.id"
-                role="listitem"
-                :to="'/topic/' + task.topicId"
-                title="Acessar tópico {{ task.topicName }}"
-                aria-label="Tarefa: {{ task.name }}, status: {{ task.status ? 'Concluída' : 'Pendente' }}, prioridade: {{ getPriorityText(task.priority) }}"
-            >
-                <div class="grid__item-header">
-                    <p class="grid__item-title text text--small text--muted">
-                        {{ task.topicName }}
-                    </p>
-                    <div class="grid__item-info">
-                        <p class="grid__item-name text">{{ task.name }}</p>
-
-                        <div class="grid__item-info--small">
-                            <span
-                                :class="['tag', getPriorityClass(task.priority)]"
-                                aria-hidden="true"
-                            >
-                                <i :class="getPriorityIcon(task.priority)" aria-hidden="true"></i>
-                                {{ getPriorityText(task.priority) }}
-                            </span>
-                            <p class="text text--icon text--small">
-                                <fa icon="clock" />
-                                Criado em: {{ task.created_at }}
-                            </p>
-                            <p class="text text--icon text--small" v-if="task.delivery_date">
-                                <fa icon="bell" />
-                                Entrega para: {{ formatDate(task.delivery_date) }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="grid__item-footer" />
-            </RouterLink>
+                :task="task"
+                :task-states="taskStates"
+            />
         </div>
     </div>
 </template>
@@ -303,77 +256,6 @@ onMounted(() => {
 
         @media (width <=768px) {
             padding-bottom: calc(var(--padding) * 2);
-        }
-
-        .grid__item {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-            background-color: var(--bg-primary);
-            padding: var(--padding);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            text-decoration: none;
-            transition: all 0.3s ease;
-
-            &.completed .grid__item-footer {
-                --border-color: hsl(158, 40%, 70%);
-            }
-
-            &.task--hovering:not(.task--focused) {
-                opacity: 0.4;
-            }
-
-            .grid__item-header {
-                display: grid;
-                gap: 1rem;
-
-                > .text {
-                    font-weight: 500;
-                }
-
-                .grid__item-info {
-                    display: grid;
-                    gap: 1rem;
-
-                    .grid__item-info--small {
-                        display: flex;
-                        align-items: flex-start;
-                        flex-direction: column;
-                        gap: 0.5rem;
-
-                        .tag {
-                            border-radius: calc(var(--radius) * 1.5);
-                            margin-bottom: 0.25rem;
-                        }
-                    }
-                }
-            }
-
-            .grid__item-footer {
-                width: 100%;
-                margin-top: auto;
-
-                .grid__item-comment {
-                    height: 100%;
-                    padding: calc(var(--padding) / 2);
-                    border: 1px solid var(--border-color);
-                    border-radius: var(--radius);
-
-                    div {
-                        * {
-                            margin: revert;
-                            padding: revert;
-                        }
-
-                        a {
-                            pointer-events: none;
-                            text-decoration: none;
-                        }
-                    }
-                }
-            }
         }
 
         ~ * {

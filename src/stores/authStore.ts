@@ -27,7 +27,9 @@ export const useAuthStore = defineStore("auth", () => {
 
         try {
             const docRef = doc(db, PRINCIPAL_DOC_NAME, user.value.uid);
-            await Promise.all([deleteDoc(docRef), deleteUser(auth.currentUser)]);
+            const promises = [deleteDoc(docRef), deleteUser(auth.currentUser)];
+
+            await Promise.all(promises);
         } catch (error) {
             throw error;
         }

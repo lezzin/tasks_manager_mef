@@ -30,10 +30,10 @@ const PAGE_TITLES: PageTitles = {
 };
 
 const TASK_PRIORITIES: Record<"high" | "medium" | "low" | "completed", TaskPriority> = {
-    completed: 3,
-    high: 3,
-    medium: 2,
     low: 1,
+    medium: 2,
+    high: 3,
+    completed: 4,
 };
 
 const TASK_KANBAN_STATUSES: Record<TaskStatus, TaskStatus> = {

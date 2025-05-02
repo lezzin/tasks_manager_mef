@@ -2,7 +2,7 @@
 import type { Topic } from "@/interfaces/Topic";
 
 import { RouterLink, useRouter } from "vue-router";
-import { inject, markRaw, ref, type PropType } from "vue";
+import { inject, markRaw, ref } from "vue";
 
 import { useAuthStore } from "../../stores/authStore";
 
@@ -14,17 +14,20 @@ import { useTopic } from "../../composables/useTopic";
 import TopicFormEdit from "../forms/TopicFormEdit.vue";
 import UIButton from "../ui/UIButton.vue";
 import CreatorLink from "../shared/CreatorLink.vue";
+import { useSidebarStore } from "@/stores/sidebarStore";
 
 const emit = defineEmits(["close"]);
 
 const { deleteTopic, deleteAllTopics } = useTopic();
 const { showToast } = useToast();
 const { user } = useAuthStore();
+
+const sidebarStore = useSidebarStore();
 const router = useRouter();
 const modal = useModal();
 
 interface TopicNavigationProps {
-    data?: Topic[];
+    data?: Topic[] | null;
 }
 
 const props = defineProps<TopicNavigationProps>();
@@ -154,6 +157,7 @@ const handleDeleteAllTopics = async () => {
             <UIButton
                 title="Visualização geral"
                 isLink
+                @click="() => (sidebarStore.isTopicSidebarActive = false)"
                 to="/general"
                 variant="outline-primary-small"
             >

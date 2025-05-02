@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import type { Task } from "@/interfaces/Task";
+
+import { onMounted, ref, useAttrs } from "vue";
 import { getPriorityClass, getPriorityIcon, getPriorityText } from "../../utils/priorityUtils";
 import { formatDate } from "../../utils/dateUtils";
 
 import UIButton from "../ui/UIButton.vue";
-import { useAttrs, type PropType } from "vue";
-import type { Task } from "@/interfaces/Task";
 
 interface TaskItemProps {
     task: Task;
@@ -14,6 +15,7 @@ interface TaskItemProps {
     showComments?: boolean;
     showCompletedStatus?: boolean;
     variant?: string;
+    focus: boolean;
 }
 
 const props = withDefaults(defineProps<TaskItemProps>(), {
@@ -23,6 +25,7 @@ const props = withDefaults(defineProps<TaskItemProps>(), {
     showComments: true,
     showCompletedStatus: true,
     variant: "normal",
+    focus: false,
 });
 
 const emit = defineEmits(["changeStatus", "openComment", "edit", "delete"]);
@@ -32,13 +35,31 @@ const changeTaskStatus = (task: Task) => emit("changeStatus", task);
 const openTaskComment = (comment: string) => emit("openComment", comment);
 const openEditTaskModal = (task: Task) => emit("edit", task);
 const deleteTask = (task: Task) => emit("delete", task);
+
+const FOCUS_TIMEOUT = 2000;
+
+const allTaskClasses = [
+    "task",
+    props.task.status && props.showCompletedStatus ? "completed" : "",
+    props.focus ? "task--focus" : "",
+];
+
+const classes = ref(allTaskClasses.join(" "));
+
+const focusOnTask = () => {
+    if (!props.focus) return;
+
+    setTimeout(() => {
+        allTaskClasses.pop();
+        classes.value = allTaskClasses.join(" ");
+    }, FOCUS_TIMEOUT);
+};
+
+onMounted(focusOnTask);
 </script>
 
 <template>
-    <div
-        :class="['task', props.variant, { completed: task.status && showCompletedStatus }]"
-        v-bind="attrs"
-    >
+    <div :class="classes" v-bind="attrs">
         <div class="task__information">
             <p :class="`text-${props.variant} truncate`" style="--line-clamp: 1">
                 {{ props.task.name }}
@@ -114,6 +135,11 @@ const deleteTask = (task: Task) => emit("delete", task);
     padding: 1.4rem var(--padding);
     border-radius: var(--radius);
     background-color: var(--bg-primary);
+    transition: all 0.3s ease;
+}
+
+.task--focus {
+    box-shadow: 0 0 1rem #000;
 }
 
 .task.smaller {

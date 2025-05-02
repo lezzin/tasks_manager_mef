@@ -47,6 +47,8 @@ const router = useRouter();
 const filterTask = ref("all");
 const searchTask = ref("");
 
+const taskToFocus = computed(() => (route.query.focus as string) || "");
+
 const STATUS_ORDER: Record<TaskStatus, number> = {
     todo: 1,
     doing: 2,
@@ -287,7 +289,12 @@ provide("selectedTopic", selectedTopic);
                 <span class="divider" role="separator" aria-hidden="true"></span>
 
                 <section aria-label="Lista de tarefas filtradas">
-                    <TaskNavigation :topic="selectedTopic.name" :tasks="filteredTasks" />
+                    <TaskNavigation
+                        :topic="selectedTopic.name"
+                        :tasks="filteredTasks"
+                        :focus="taskToFocus"
+                    ></TaskNavigation>
+                    />
                 </section>
             </div>
             <div v-else class="image-centered" aria-live="polite" aria-atomic="true">

@@ -1,3 +1,12 @@
+export interface TaskState {
+    isHovering: boolean;
+    isFocused: boolean;
+}
+
+export interface TaskStates {
+    [key: string]: TaskState;
+}
+
 export type TaskStatus = "todo" | "doing" | "completed";
 export type TaskPriority = 1 | 2 | 3 | 4;
 

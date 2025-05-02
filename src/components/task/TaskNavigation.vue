@@ -21,6 +21,7 @@ const { showToast } = useToast();
 interface TaskNavigationProps {
     topic: string;
     tasks: Task[];
+    focus?: string;
 }
 
 const { user } = useAuthStore();
@@ -76,6 +77,10 @@ const openTaskComment = async (comment: string) => {
     modal.component.value = markRaw(CommentModal) as any;
     modal.showModal();
 };
+
+const canFocus = (task: Task): boolean => {
+    return task.id == props.focus;
+};
 </script>
 
 <template>
@@ -88,6 +93,7 @@ const openTaskComment = async (comment: string) => {
             @edit="openEditTaskModal"
             @openComment="openTaskComment"
             @delete="confirmTaskRemotion"
+            :focus="canFocus(task)"
         />
 
         <p class="text text--center" v-if="props.tasks.length === 0">
