@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import UIModal from "../ui/UIModal.vue";
 import UIButton from "../ui/UIButton.vue";
-import type { ConfirmModalInterface } from "@/interfaces/ConfirmModalInterface";
+import type { ConfirmModalInterface } from "@/interfaces/ConfirmModal";
 
 interface ConfirmModalProps {
     modal: ConfirmModalInterface;

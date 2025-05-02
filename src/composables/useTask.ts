@@ -1,3 +1,5 @@
+import type { Task, TaskAddInterface, TaskPriority, TaskStatus } from "@/interfaces/Task.ts";
+
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../libs/firebase";
 
@@ -7,8 +9,9 @@ import { filterField } from "../utils/stringUtils";
 import { currentTime } from "../utils/dateUtils";
 
 import { useTopic } from "./useTopic";
-import type { Task, TaskAddInterface, TaskPriority, TaskStatus } from "@/interfaces/Task.ts";
+import { useToast } from "./useToast.ts";
 
+const { showToast } = useToast();
 const { user } = useAuthStore();
 
 type TaskMap = Record<string, Task>;
@@ -50,8 +53,8 @@ const checkUserTasks = async (): Promise<boolean> => {
 
         const userData = docSnap.data();
         hasAnyTask = !!userData.tasks && Object.entries(userData.tasks).length > 0;
-    } catch (error) {
-        console.error("Error fetching user tasks:", error);
+    } catch (error: any) {
+        showToast("danger", "Erro ao verificar tarefas");
     }
 
     return hasAnyTask;
@@ -66,7 +69,7 @@ const getUserTasks = async (userId: string): Promise<TaskMap> => {
 
         const userData = docSnap.data();
         return userData?.tasks ? { ...userData.tasks } : {};
-    } catch (error) {
+    } catch (error: any) {
         throw error;
     }
 };

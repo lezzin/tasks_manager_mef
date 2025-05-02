@@ -30,9 +30,8 @@ async function loginGoogle() {
     try {
         await signInWithPopup(auth, provider);
         router.push("/");
-    } catch (error) {
-        const err = error as Error & { code?: string };
-        showToast("danger", GOOGLE_AUTH_ERRORS[err.code ?? "default"] ?? err.message);
+    } catch (error: any) {
+        showToast("danger", GOOGLE_AUTH_ERRORS[error.code ?? "default"] ?? error.message);
     } finally {
         loading.value = false;
     }

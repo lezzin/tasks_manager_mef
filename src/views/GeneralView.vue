@@ -120,7 +120,7 @@ const loadTasks = async () => {
     try {
         allUserTasks.value = await getUserTasksWithTopic(user.uid);
         updatePriorityCounter();
-    } catch (error) {
+    } catch (error: any) {
         showToast("danger", `Erro ao resgatar tarefas. Tente novamente mais tarde.`);
     } finally {
         loadingStore.hideLoader();

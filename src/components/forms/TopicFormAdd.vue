@@ -26,11 +26,9 @@ const handleAddTopic = async () => {
         await addTopic(name.value, user.uid);
         showToast("success", "Tópico criado com sucesso.");
         name.value = "";
-    } catch (error) {
-        const err = error as Error & { code?: string };
-
-        if (err.code == "name") {
-            nameError.value = err.message;
+    } catch (error: any) {
+        if (error.code == "name") {
+            nameError.value = error.message;
             return;
         }
 

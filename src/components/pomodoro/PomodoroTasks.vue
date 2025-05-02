@@ -43,12 +43,10 @@ const loadTasks = async () => {
 
     try {
         tasks.data = await getUserTasksWithTopic(user.uid);
-    } catch (error) {
-        const err = error as Error & { code?: string };
+    } catch (error: any) {
+        showToast("danger", error.message);
 
-        showToast("danger", err.message);
-
-        if (err.code === "topic-not-found" || err.code === "doc-not-found") {
+        if (error.code === "topic-not-found" || error.code === "doc-not-found") {
             router.push("/");
         }
     } finally {
@@ -66,7 +64,7 @@ const handleChangeTaskStatus = async (taskToUpdate: Task) => {
             ? TASK_KANBAN_STATUSES.completed
             : TASK_KANBAN_STATUSES.todo;
         showToast("success", "Status de conclusão alterado com sucesso.");
-    } catch (error) {
+    } catch (error: any) {
         showToast("danger", "Erro ao alterar status da tarefa.");
     }
 };

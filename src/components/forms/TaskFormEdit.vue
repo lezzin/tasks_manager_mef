@@ -69,18 +69,13 @@ const handleEditTask = async () => {
         );
         showToast("success", "Tarefa alterada com sucesso.");
         closeEditTaskModal();
-    } catch (error) {
-        const err = error as Error & { code?: string };
-
-        const errors: Record<string, () => void> = {
-            "empty-name": () => (taskNameError.value = err.message),
-            "invalid-date": () => (taskDateError.value = err.message),
+    } catch (error: any) {
+        const errors: Record<string, string> = {
+            "empty-name": "Preencha o campo de nome.",
+            "invalid-date": "Formato de data incorreto.",
         };
 
-        (
-            errors[err.code ?? ""] ||
-            (() => showToast("danger", "Erro desconhecido. Tente novamente mais tarde."))
-        )();
+        showToast("danger", errors[error.code] ?? "Erro desconhecido. Contate os administradores.");
     }
 };
 

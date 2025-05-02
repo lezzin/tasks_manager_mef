@@ -42,7 +42,7 @@ const handleChangeTaskStatus = async (taskToUpdate: Task) => {
         showToast("success", "Status de conclusão alterado com sucesso.");
         filterTask.value = "all";
         searchTask.value = "";
-    } catch (error) {
+    } catch (error: any) {
         showToast("danger", "Erro ao alterar status da tarefa.");
     }
 };
@@ -60,7 +60,7 @@ const handleDeleteTask = async (taskToDelete: Task) => {
     try {
         await deleteTask(taskToDelete, user.uid);
         showToast("success", "Tarefa excluída com sucesso!");
-    } catch (error) {
+    } catch (error: any) {
         showToast("danger", "Erro ao excluir tarefa.");
     }
 };

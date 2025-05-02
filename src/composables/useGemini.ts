@@ -22,8 +22,7 @@ const parseResponse = (response: string): SuggestionResponse => {
     try {
         const sanitizedResponse = JSON.parse(sanitizeJSON(response.replace(/```json|```/g, "")));
         return sanitizedResponse;
-    } catch (error) {
-        console.error("Erro ao parsear a resposta:", error);
+    } catch (error: any) {
         return { error: "Erro ao processar a resposta. Tente novamente." };
     }
 };

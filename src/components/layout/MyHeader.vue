@@ -38,17 +38,18 @@ const logoutUser = async () => {
         await logout();
         router.push("/login");
         isAccountDropdownActive.value = false;
-    } catch (error) {
-        const err = error as Error & { code?: string };
-
-        const errors: Record<string, () => void> = {
-            "auth/network-request-failed": () =>
+    } catch (error: any) {
+        const errors: Record<string, string> = {
+            "auth/network-request-failed":
                 "Falha na conexão de rede. Verifique sua conexão e tente novamente.",
-            "auth/internal-error": () => "Erro interno do servidor. Tente novamente mais tarde.",
-            "auth/no-current-user": () => "Nenhum usuário autenticado no momento.",
+            "auth/internal-error": "Erro interno do servidor. Tente novamente mais tarde.",
+            "auth/no-current-user": "Nenhum usuário autenticado no momento.",
         };
 
-        (errors[err.code ?? ""] || (() => showToast("danger", `Erro ao sair: ${err.message}`)))();
+        showToast(
+            "danger",
+            errors[error.code] ?? "Erro ao comunicar-se com o Google. Contate os administradores."
+        );
     } finally {
         loadingStore.hideLoader();
     }
@@ -65,17 +66,17 @@ const removeUser = async () => {
         await deleteAccount();
         router.push("/login");
         isAccountDropdownActive.value = false;
-    } catch (error) {
-        const err = error as Error & { code?: string };
-
-        const errors: Record<string, () => void> = {
-            "auth/requires-recent-login": () =>
-                "Para excluir sua conta, faça login e tente novamente.",
-            "auth/network-request-failed": () =>
+    } catch (error: any) {
+        const errors: Record<string, string> = {
+            "auth/requires-recent-login": "Para excluir sua conta, faça login e tente novamente.",
+            "auth/network-request-failed":
                 "Falha na conexão de rede. Verifique sua conexão e tente novamente.",
         };
 
-        (errors[err.code ?? ""] || (() => showToast("danger", `Erro ao sair: ${err.message}`)))();
+        showToast(
+            "danger",
+            errors[error.code] ?? "Erro ao comunicar-se com o Google. Contate os administradores."
+        );
     } finally {
         loadingStore.hideLoader();
     }

@@ -67,9 +67,8 @@ const handleDeleteTopic = async (topicId: string) => {
         showToast("success", "Tópico excluído com sucesso.");
         selectedTopic.value = null;
         if (router.currentRoute.value.fullPath !== "/") router.push("/");
-    } catch (error) {
-        const err = error as Error;
-        showToast("danger", err.message ?? "Erro desconhecido. Tente novamente mais tarde.");
+    } catch (error: any) {
+        showToast("danger", error.message ?? "Erro desconhecido. Tente novamente mais tarde.");
     }
 };
 
@@ -80,9 +79,8 @@ const handleDeleteAllTopics = async () => {
         await deleteAllTopics(user.uid);
         showToast("success", "Todos os tópicos foram excluídos com sucesso.");
         selectedTopic.value = null;
-    } catch (error) {
-        const err = error as Error;
-        showToast("danger", err.message ?? "Erro desconhecido. Tente novamente mais tarde.");
+    } catch (error: any) {
+        showToast("danger", error.message ?? "Erro desconhecido. Tente novamente mais tarde.");
     }
 };
 </script>

@@ -97,7 +97,7 @@ const moveTask = (task: Task, direction: TaskDirection) => emit("moveTask", task
         position: sticky;
         font-size: 1.4rem;
         top: calc(10vh - 1px);
-        padding: 1rem var(--padding);
+        padding-block: 1rem;
         background-color: var(--bg-secondary);
         z-index: 1;
         transition: border-bottom-color var(--screen-transition) ease;
@@ -113,7 +113,7 @@ const moveTask = (task: Task, direction: TaskDirection) => emit("moveTask", task
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        padding-inline: var(--padding);
+        /* padding-inline: var(--padding); */
 
         .task {
             display: flex;

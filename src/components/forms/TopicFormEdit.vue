@@ -36,15 +36,13 @@ const handleEditTopic = async () => {
         await editTopic(name.value, oldName.value, user.uid);
         showToast("success", "Tópico atualizado com sucesso.");
         closeEditTopicModal();
-    } catch (error) {
-        const err = error as Error & { code?: string };
-
-        if (err.code == "name") {
-            nameError.value = err.message;
+    } catch (error: any) {
+        if (error.code == "name") {
+            nameError.value = error.message;
             return;
         }
 
-        if (err.code == "same-name") {
+        if (error.code == "same-name") {
             closeEditTopicModal();
             return;
         }

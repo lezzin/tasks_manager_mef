@@ -17,7 +17,7 @@ export const useAuthStore = defineStore("auth", () => {
     const logout = async () => {
         try {
             await signOut(auth);
-        } catch (error) {
+        } catch (error: any) {
             throw error;
         }
     };
@@ -30,7 +30,7 @@ export const useAuthStore = defineStore("auth", () => {
             const promises = [deleteDoc(docRef), deleteUser(auth.currentUser)];
 
             await Promise.all(promises);
-        } catch (error) {
+        } catch (error: any) {
             throw error;
         }
     };

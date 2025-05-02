@@ -93,18 +93,13 @@ const handleAddTask = async () => {
         await addTask(options, user.uid);
         closeAddingTask();
         showToast("success", "Tarefa adicionada com sucesso.");
-    } catch (error) {
-        const err = error as Error & { code?: string };
-
-        const errors: Record<string, () => void> = {
-            "empty-name": () => (taskNameError.value = err.message),
-            "invalid-date": () => (taskDateError.value = err.message),
+    } catch (error: any) {
+        const errors: Record<string, string> = {
+            "empty-name": "Preencha o campo de nome.",
+            "invalid-date": "Formato de data incorreto.",
         };
 
-        (
-            errors[err.code ?? ""] ||
-            (() => showToast("danger", "Erro desconhecido. Tente novamente mais tarde."))
-        )();
+        showToast("danger", errors[error.code] ?? "Erro desconhecido. Contate os administradores.");
     }
 };
 
@@ -134,8 +129,7 @@ const requestSuggestion = async () => {
 
         taskName.value = geminiSuggestedTask.data.task ?? "";
         taskComment.value = geminiSuggestedTask.data.details ?? "";
-    } catch (error) {
-        console.error(error);
+    } catch (error: any) {
         showToast("danger", `Erro ao obter sugestão de tarefa.`);
     } finally {
         isRequestingGemini.value = false;
@@ -205,7 +199,7 @@ watch(taskDate, () => (taskDateError.value = ""));
                         <template #trigger="{ trigger }">
                             <UIButton
                                 variant="outline-primary-smallest"
-                                @click="trigger"
+                                @click="() => trigger"
                                 :title="isGeminiDropdownActive ? 'Esconder' : 'Visualizar'"
                             >
                                 <img
