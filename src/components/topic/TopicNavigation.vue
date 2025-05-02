@@ -23,14 +23,11 @@ const { user } = useAuthStore();
 const router = useRouter();
 const modal = useModal();
 
-const props = defineProps({
-    data: {
-        type: Array as PropType<Topic[] | null>,
-        default() {
-            return [];
-        },
-    },
-});
+interface TopicNavigationProps {
+    data?: Topic[];
+}
+
+const props = defineProps<TopicNavigationProps>();
 
 const { setConfirmModal } = useConfirmModal();
 

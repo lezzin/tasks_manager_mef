@@ -13,18 +13,13 @@ import UIButton from "../ui/UIButton.vue";
 import UIModal from "../ui/UIModal.vue";
 import type { Task, TaskPriority } from "@/interfaces/Task.ts";
 
-const emit = defineEmits(["close"]);
+interface TaskFormEditProps {
+    topic?: string;
+    task?: Task;
+}
 
-const props = defineProps({
-    topic: {
-        type: String,
-        required: false,
-    },
-    task: {
-        type: Object as PropType<Task>,
-        required: false,
-    },
-});
+const props = defineProps<TaskFormEditProps>();
+const emit = defineEmits(["close"]);
 
 const { user } = useAuthStore();
 const { editTask } = useTask();

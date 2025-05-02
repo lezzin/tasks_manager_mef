@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import UIButton from "./UIButton.vue";
 
-const emit = defineEmits(["close"]);
+interface UIModalProps {
+    titleId: string;
+}
 
-const props = defineProps({
-    titleId: {
-        type: String,
-        default: "modal-title",
-    },
+withDefaults(defineProps<UIModalProps>(), {
+    titleId: "modal-title",
 });
+const emit = defineEmits(["close"]);
 
 const closeModal = () => emit("close");
 </script>

@@ -2,22 +2,15 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { baseUrl } from "../../utils/urlUtils";
 
-const props = defineProps({
-    small: {
-        type: String,
-        required: true,
-    },
-    lg: {
-        type: String,
-        required: true,
-    },
-    alt: {
-        type: String,
-        default: "",
-    },
-});
+interface ImageResponsiveProps {
+    small: string;
+    lg: string;
+    alt?: string;
+}
 
-const isSmallScreen = ref(window.innerWidth < 768);
+const props = defineProps<ImageResponsiveProps>();
+
+const isSmallScreen = ref<boolean>(window.innerWidth < 768);
 
 const updateScreenSize = () => {
     isSmallScreen.value = window.innerWidth < 768;

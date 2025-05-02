@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import UIModal from "../ui/UIModal.vue";
 import UIButton from "../ui/UIButton.vue";
-import type { PropType } from "vue";
 import type { ConfirmModalInterface } from "@/interfaces/ConfirmModalInterface";
 
-const props = defineProps({
-    modal: {
-        type: Object as PropType<ConfirmModalInterface>,
-    },
-});
+interface ConfirmModalProps {
+    modal: ConfirmModalInterface;
+}
 
+const props = defineProps<ConfirmModalProps>();
 const emit = defineEmits(["close"]);
 
 const closeShowingModal = () => emit("close");

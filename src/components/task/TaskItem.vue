@@ -6,40 +6,27 @@ import UIButton from "../ui/UIButton.vue";
 import { useAttrs, type PropType } from "vue";
 import type { Task } from "@/interfaces/Task";
 
-const emit = defineEmits(["changeStatus", "openComment", "edit", "delete"]);
+interface TaskItemProps {
+    task: Task;
+    showPriorities?: boolean;
+    showEdit?: boolean;
+    showDelete?: boolean;
+    showComments?: boolean;
+    showCompletedStatus?: boolean;
+    variant?: string;
+}
 
-const attrs = useAttrs();
-
-const props = defineProps({
-    task: {
-        type: Object as PropType<Task>,
-        default: null,
-    },
-    showPriorities: {
-        type: Boolean,
-        default: true,
-    },
-    showEdit: {
-        type: Boolean,
-        default: true,
-    },
-    showDelete: {
-        type: Boolean,
-        default: true,
-    },
-    showComments: {
-        type: Boolean,
-        default: true,
-    },
-    showCompletedStatus: {
-        type: Boolean,
-        default: true,
-    },
-    variant: {
-        type: String,
-        default: "normal",
-    },
+const props = withDefaults(defineProps<TaskItemProps>(), {
+    showPriorities: true,
+    showEdit: true,
+    showDelete: true,
+    showComments: true,
+    showCompletedStatus: true,
+    variant: "normal",
 });
+
+const emit = defineEmits(["changeStatus", "openComment", "edit", "delete"]);
+const attrs = useAttrs();
 
 const changeTaskStatus = (task: Task) => emit("changeStatus", task);
 const openTaskComment = (comment: string) => emit("openComment", comment);

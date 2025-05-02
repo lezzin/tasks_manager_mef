@@ -19,15 +19,19 @@ import type { Firestore } from "firebase/firestore";
 type TaskDirection = "prev" | "next";
 type DragAction = "start" | "end";
 
-const props = defineProps<{
-    db?: Firestore;
-}>();
+interface KanbanViewProps {
+    db: Firestore;
+}
 
-const tasks = reactive<{
+interface TaskList {
     todo: Task[];
     doing: Task[];
     completed: Task[];
-}>({
+}
+
+const props = defineProps<KanbanViewProps>();
+
+const tasks = reactive<TaskList>({
     todo: [],
     doing: [],
     completed: [],

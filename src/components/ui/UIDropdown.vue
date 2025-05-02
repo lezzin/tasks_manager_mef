@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
+interface UIDropdownProps {
+    isActive: boolean;
+}
+
+const props = defineProps<UIDropdownProps>();
 const emit = defineEmits(["trigger"]);
-const props = defineProps({
-    isActive: {
-        type: Boolean,
-        required: true,
-    },
-});
 
 const toggleDropdown = () => emit("trigger");
 

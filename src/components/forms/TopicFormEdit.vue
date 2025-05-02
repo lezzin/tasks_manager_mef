@@ -10,14 +10,13 @@ import UIModal from "../ui/UIModal.vue";
 const { showToast } = useToast();
 const { editTopic } = useTopic();
 const { user } = useAuthStore();
-const emit = defineEmits(["close"]);
 
-const props = defineProps({
-    topic: {
-        type: String,
-        required: false,
-    },
-});
+interface TopicFormEditProps {
+    topic?: string;
+}
+
+const props = defineProps<TopicFormEditProps>();
+const emit = defineEmits(["close"]);
 
 const oldName = ref<string>("");
 const name = ref<string>("");

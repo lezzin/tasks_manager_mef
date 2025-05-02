@@ -16,17 +16,12 @@ import UIModal from "../ui/UIModal.vue";
 import type { SuggestionResponse } from "@/interfaces/SuggestionResponse.ts";
 import type { TaskAddInterface, TaskPriority } from "@/interfaces/Task.ts";
 
-const props = defineProps({
-    topicId: {
-        type: String,
-        default: "",
-    },
-    topicName: {
-        type: String,
-        default: "",
-    },
-});
+interface TaskFormAddProps {
+    topicId?: string;
+    topicName?: string;
+}
 
+const props = defineProps<TaskFormAddProps>();
 const emit = defineEmits(["close"]);
 
 const { user } = useAuthStore();
@@ -76,7 +71,7 @@ const updateTaskComment = (value: string) => {
 };
 
 const handleAddTask = async () => {
-    if (!user?.uid) return;
+    if (!user?.uid || !props.topicId || !props.topicName) return;
 
     try {
         const options: TaskAddInterface = {
@@ -114,7 +109,7 @@ const requestSuggestion = async () => {
     isRequestingGemini.value = true;
     taskNameError.value = "";
 
-    if (!user?.uid) return;
+    if (!user?.uid || !props.topicId) return;
 
     try {
         const selectedTopicTasks = await getUserTasksByTopic(props.topicId, user.uid);

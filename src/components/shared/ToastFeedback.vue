@@ -6,13 +6,11 @@ import { computed, onMounted, onBeforeUnmount, type PropType } from "vue";
 
 import UIButton from "../ui/UIButton.vue";
 
-const props = defineProps({
-    data: {
-        type: Object as PropType<ToastInterface>,
-        required: true,
-    },
-});
+interface ToastFeedbackProps {
+    data: ToastInterface;
+}
 
+const props = defineProps<ToastFeedbackProps>();
 const emit = defineEmits(["close"]);
 
 const TOAST_TITLES: Record<ToastType, string> = {

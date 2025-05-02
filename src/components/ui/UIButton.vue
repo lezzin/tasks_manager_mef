@@ -1,19 +1,7 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
 import { useAttrs } from "vue";
-
-type ButtonVariant =
-    | ""
-    | "primary"
-    | "outline-primary"
-    | "outline-primary-small"
-    | "outline-primary-smallest"
-    | "warning"
-    | "danger"
-    | "outline-danger"
-    | "outline-danger-small";
-
-type ButtonType = "button" | "submit" | "reset";
+import type { ButtonType, ButtonVariant } from "@/types/UIBUtton";
 
 const props = defineProps<{
     isLink?: boolean;

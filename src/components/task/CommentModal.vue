@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import UIModal from "../ui/UIModal.vue";
 
-const emit = defineEmits(["close"]);
+interface CommentModalProps {
+    comment?: string;
+}
 
-const props = defineProps({
-    comment: {
-        type: String,
-        required: false,
-    },
-});
+const props = defineProps<CommentModalProps>();
+const emit = defineEmits(["close"]);
 
 const closeShowingComment = () => {
     emit("close");

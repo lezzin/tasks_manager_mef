@@ -23,12 +23,11 @@ import TopicNavigation from "../components/topic/TopicNavigation.vue";
 import ImageResponsive from "../components/shared/ImageResponsive.vue";
 import UIButton from "../components/ui/UIButton.vue";
 
-const props = defineProps({
-    db: {
-        type: Object as PropType<Firestore>,
-        required: false,
-    },
-});
+interface HomeViewProps {
+    db: Firestore;
+}
+
+const props = defineProps<HomeViewProps>();
 
 const aside = ref(null);
 const selectedTopic = ref<Topic | null>(null);

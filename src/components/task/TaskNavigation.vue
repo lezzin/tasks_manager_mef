@@ -18,19 +18,15 @@ const { changeStatus, deleteTask } = useTask();
 const { setConfirmModal } = useConfirmModal();
 const { showToast } = useToast();
 
+interface TaskNavigationProps {
+    topic: string;
+    tasks: Task[];
+}
+
 const { user } = useAuthStore();
 const modal = useModal();
 
-const props = defineProps({
-    topic: {
-        type: String,
-        required: true,
-    },
-    tasks: {
-        type: Object as PropType<Task[]>,
-        required: true,
-    },
-});
+const props = defineProps<TaskNavigationProps>();
 
 const editingTask = ref<null | Task>(null);
 const selectedComment = ref("");
