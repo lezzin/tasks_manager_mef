@@ -55,6 +55,13 @@ const label = computed<string>(
                         {{ getPriorityText(task.priority) }}
                     </span>
 
+                    <template v-if="task.generatedByAI">
+                        <div class="tag ai-image">
+                            <img src="/src/assets/img/gemini-logo.png" alt="Logo do Gemini" />
+                            <span>gerado com IA</span>
+                        </div>
+                    </template>
+
                     <p class="text text--icon text--small">
                         <fa icon="clock" />
                         Criado em: {{ task.created_at }}
@@ -138,6 +145,21 @@ const label = computed<string>(
                     text-decoration: none;
                 }
             }
+        }
+    }
+}
+
+.tag.ai-image {
+    background: linear-gradient(90deg, rgba(0, 166, 255, 0.5) 0%, rgba(0, 255, 0, 0.5) 100%);
+
+    img {
+        width: 11px;
+        aspect-ratio: 1;
+        margin-right: 0.25rem;
+
+        ~ span {
+            font-weight: normal;
+            color: var(--font-primary);
         }
     }
 }

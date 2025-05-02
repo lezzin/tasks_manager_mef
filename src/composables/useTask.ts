@@ -102,7 +102,7 @@ const updateTasks = async (userId: string, tasks: TaskMap | null): Promise<void>
 };
 
 const addTask = async (options: TaskAddInterface, userId: string): Promise<void> => {
-    const { topicId, topicName, name, comment, priority, delivery_date } = options;
+    const { topicId, topicName, name, comment, priority, delivery_date, generatedByAI } = options;
 
     validateTaskName(name);
     validateDeliveryDate(delivery_date);
@@ -118,6 +118,7 @@ const addTask = async (options: TaskAddInterface, userId: string): Promise<void>
         kanbanStatus: TASK_KANBAN_STATUSES.todo,
         topicId,
         topicName,
+        generatedByAI,
     };
 
     const allTasks = await getUserTasks(userId);

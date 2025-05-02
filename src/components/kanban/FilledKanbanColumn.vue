@@ -4,13 +4,15 @@ import type { Task, TaskStatus } from "@/interfaces/Task";
 
 import { getPriorityClass, getPriorityIcon, getPriorityText } from "@/utils/priorityUtils";
 import UIButton from "../ui/UIButton.vue";
+import { computed } from "vue";
+import { useSidebarStore } from "@/stores/sidebarStore";
 
 interface FilledKanbanColumnProps {
     task: Task;
     kanbanStatus: TaskStatus;
 }
 
-defineProps<FilledKanbanColumnProps>();
+const props = defineProps<FilledKanbanColumnProps>();
 const emit = defineEmits<{
     (e: "onDragEnter"): void;
     (e: "dragEvents", event?: DragEvent, action?: DragAction, task?: Task): void;
@@ -18,8 +20,12 @@ const emit = defineEmits<{
     (e: "onDrop"): void;
 }>();
 
+const sidebarStore = useSidebarStore();
+
 const isFirstColumn = (kanbanStatus: string): boolean => kanbanStatus === "todo";
 const isLastColumn = (kanbanStatus: string): boolean => kanbanStatus === "completed";
+
+const link = computed<string>(() => `/topic/${props.task.topicId}?focus=${props.task.id}`);
 </script>
 
 <template>
@@ -37,20 +43,30 @@ const isLastColumn = (kanbanStatus: string): boolean => kanbanStatus === "comple
 
         <RouterLink
             class="text text--bold truncate"
-            :to="'/topic/' + task.topicId"
+            :to="link"
+            @click="() => (sidebarStore.isTopicSidebarActive = false)"
             style="--line-clamp: 1"
             :aria-labelledby="'task-' + task.id"
         >
             <span :id="'task-' + task.id">{{ task.name }}</span>
         </RouterLink>
 
-        <span
-            :class="['tag', getPriorityClass(task.priority)]"
-            :aria-label="getPriorityText(task.priority)"
-        >
-            <fa :icon="getPriorityIcon(task.priority)" />
-            {{ getPriorityText(task.priority) }}
-        </span>
+        <div class="tags">
+            <span
+                :class="['tag', getPriorityClass(task.priority)]"
+                :aria-label="getPriorityText(task.priority)"
+            >
+                <fa :icon="getPriorityIcon(task.priority)" />
+                {{ getPriorityText(task.priority) }}
+            </span>
+
+            <template v-if="task.generatedByAI">
+                <div class="tag ai-image">
+                    <img src="/src/assets/img/gemini-logo.png" alt="Logo do Gemini" />
+                    <span>gerado com IA</span>
+                </div>
+            </template>
+        </div>
 
         <div class="task__navigation">
             <UIButton
@@ -76,3 +92,26 @@ const isLastColumn = (kanbanStatus: string): boolean => kanbanStatus === "comple
         </div>
     </div>
 </template>
+
+<style scoped>
+.tags {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.tag.ai-image {
+    background: linear-gradient(90deg, rgba(0, 166, 255, 1) 0%, rgba(0, 255, 0, 0.8) 100%);
+
+    img {
+        width: 11px;
+        aspect-ratio: 1;
+        margin-right: 0.25rem;
+
+        ~ span {
+            font-weight: normal;
+            color: var(--font-primary);
+        }
+    }
+}
+</style>

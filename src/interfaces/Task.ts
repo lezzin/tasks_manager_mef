@@ -9,7 +9,7 @@ export interface TaskStates {
 
 export type TaskStatus = "todo" | "doing" | "completed";
 
-export type TaskPriorityString = "high" | "medium" | "low" | "completed"
+export type TaskPriorityString = "high" | "medium" | "low" | "completed";
 export type TaskPriority = 1 | 2 | 3 | 4;
 export interface Task {
     id: string;
@@ -22,6 +22,7 @@ export interface Task {
     kanbanStatus: TaskStatus;
     topicId: string;
     topicName: string;
+    generatedByAI: boolean;
 }
 
 export type TaskAddInterface = Omit<Task, "id" | "status" | "created_at" | "kanbanStatus">;

@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { TASK_PRIORITIES } from "../../utils/variables.ts";
+import type { SuggestionResponse } from "@/interfaces/SuggestionResponse.ts";
+import type { TaskAddInterface, TaskPriority } from "@/interfaces/Task.ts";
 
 import { computed, inject, onMounted, reactive, ref, watch } from "vue";
+import { TASK_PRIORITIES } from "../../utils/variables.ts";
 
+import { useAuthStore } from "../../stores/authStore";
 import { useGemini } from "../../composables/useGemini";
 import { useToast } from "../../composables/useToast";
 import { useTask } from "../../composables/useTask";
-import { useAuthStore } from "../../stores/authStore";
 
-import UIButton from "../ui/UIButton.vue";
 import InputRecognition from "../utilities/InputRecognition.vue";
 import MarkdownEditor from "../utilities/MarkdownEditor.vue";
+import UIButton from "../ui/UIButton.vue";
 import UIDropdown from "../ui/UIDropdown.vue";
 import UIModal from "../ui/UIModal.vue";
-import type { SuggestionResponse } from "@/interfaces/SuggestionResponse.ts";
-import type { TaskAddInterface, TaskPriority } from "@/interfaces/Task.ts";
 
 interface TaskFormAddProps {
     topicId?: string;
@@ -56,6 +56,7 @@ const taskPriority = ref<TaskPriority>(TASK_PRIORITIES.low);
 const taskDate = ref<string>("");
 const taskDateError = ref<string>("");
 const taskComment = ref<string>("");
+const generatedByAI = ref<boolean>(false);
 
 const closeAddingTask = () => {
     taskName.value = "";
@@ -64,6 +65,7 @@ const closeAddingTask = () => {
     taskPriority.value = TASK_PRIORITIES.low;
     filterTask.value = "all";
     searchTask.value = "";
+    generatedByAI.value = false;
 
     emit("close");
 };
@@ -88,6 +90,7 @@ const handleAddTask = async () => {
             comment: taskComment.value,
             priority: taskPriority.value,
             delivery_date: taskDate.value,
+            generatedByAI: generatedByAI.value,
         };
 
         await addTask(options, user.uid);
@@ -129,6 +132,7 @@ const requestSuggestion = async () => {
 
         taskName.value = geminiSuggestedTask.data.task ?? "";
         taskComment.value = geminiSuggestedTask.data.details ?? "";
+        generatedByAI.value = true;
     } catch (error: any) {
         showToast("danger", `Erro ao obter sugestão de tarefa.`);
     } finally {

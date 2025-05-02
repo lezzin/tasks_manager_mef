@@ -64,6 +64,8 @@ const classes = computed(() => {
 });
 
 const focusOnTask = () => {
+    console.log(props.task);
+
     if (!canFocus.value) return;
 
     isFocusing.value = true;
@@ -89,6 +91,14 @@ onMounted(focusOnTask);
                     <fa :icon="getPriorityIcon(task.priority)" />
                     {{ getPriorityText(task.priority) }}
                 </span>
+
+                <template v-if="task.generatedByAI">
+                    <div class="tag ai-image">
+                        <img src="/src/assets/img/gemini-logo.png" alt="Logo do Gemini" />
+                        <span>gerado com IA</span>
+                    </div>
+                </template>
+
                 <span class="text text--icon text--small text--muted">
                     <fa icon="clock" />
                     Criado em: {{ task.created_at }}
@@ -202,6 +212,21 @@ onMounted(focusOnTask);
 
     @media (width <=768px) {
         margin-left: auto;
+    }
+}
+
+.tag.ai-image {
+    background: linear-gradient(90deg, rgba(0, 166, 255, 1) 0%, rgba(0, 255, 0, 0.8) 100%);
+
+    img {
+        width: 11px;
+        aspect-ratio: 1;
+        margin-right: 0.25rem;
+
+        ~ span {
+            font-weight: normal;
+            color: var(--font-primary);
+        }
     }
 }
 </style>
