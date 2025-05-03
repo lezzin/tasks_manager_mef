@@ -22,6 +22,7 @@ import ImageResponsive from "../components/shared/ImageResponsive.vue";
 import UIButton from "../components/ui/UIButton.vue";
 import MySidebar from "@/components/layout/MySidebar.vue";
 import TaskFilter from "@/components/task/TaskFilter.vue";
+import { baseUrl } from "@/utils/urlUtils.ts";
 
 interface HomeViewProps {
     db: Firestore;
@@ -242,19 +243,31 @@ provide("selectedTopic", selectedTopic);
                 <TaskNavigation :topic="selectedTopic.name" :tasks="filteredTasks" />
             </div>
             <div v-else class="image-centered" aria-live="polite" aria-atomic="true">
-                <ImageResponsive
-                    small="task_empty_sm.png"
-                    lg="task_empty_lg.png"
-                    alt="Frase tarefas vazias e uma imagem de uma caixa vazia"
-                />
+                <div class="image-container">
+                    <img
+                        :src="baseUrl('task_empty.svg')"
+                        alt="Frase tarefas vazias e uma imagem de uma caixa vazia"
+                        width="400"
+                        height="400"
+                    />
+
+                    <span class="text">Nenhuma tarefa encontrada</span>
+                </div>
             </div>
         </section>
         <div v-else class="container image-centered" aria-live="polite" aria-atomic="true">
-            <ImageResponsive
-                small="topic_unselected_sm.png"
-                lg="topic_unselected_lg.png"
-                alt="Uma pessoa escrevendo em um diário suas tarefas pessoais"
-            />
+            <div class="image-container">
+                <img
+                    :src="baseUrl('topic_unselected.svg')"
+                    alt="Uma pessoa escrevendo em um diário suas tarefas pessoais"
+                    width="400"
+                    height="400"
+                />
+
+                <span class="text text--bold"
+                    >Selecione algum tópico para exibir as tarefas aqui!</span
+                >
+            </div>
         </div>
     </div>
 

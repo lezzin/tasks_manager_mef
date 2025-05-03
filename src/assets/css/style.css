@@ -351,6 +351,16 @@ form {
     font-weight: 500;
 }
 
+.image-container {
+    display: grid;
+    text-align: center;
+    gap: 2.5rem;
+
+    .text {
+        font-size: 2rem;
+    }
+}
+
 .image-centered {
     display: grid;
     place-items: center;

@@ -3,6 +3,7 @@ import type { Task, TaskStatus } from "@/interfaces/Task.ts";
 import type { DragAction, KanbanViewProps, TaskDirection, TaskList } from "@/interfaces/Kanban.ts";
 
 import { PAGE_TITLES, TASK_KANBAN_STATUSES } from "../utils/variables.ts";
+import { baseUrl } from "@/utils/urlUtils.ts";
 
 import { ref, reactive, onMounted } from "vue";
 import { RouterLink, useRouter } from "vue-router";
@@ -13,7 +14,6 @@ import { useAuthStore } from "../stores/authStore.ts";
 import { useLoadingStore } from "../stores/loadingStore.ts";
 import { useSidebarStore } from "../stores/sidebarStore.ts";
 
-import ImageResponsive from "../components/shared/ImageResponsive.vue";
 import UIButton from "../components/ui/UIButton.vue";
 import KanbanColumn from "@/components/kanban/KanbanColumn.vue";
 
@@ -179,11 +179,16 @@ onMounted(() => {
     </div>
     <div class="container" v-else>
         <RouterLink to="/" title="Voltar para o início">
-            <ImageResponsive
-                small="task_empty_sm.png"
-                lg="task_empty_lg.png"
-                alt="Frase tarefas vazias e uma imagem de uma caixa vazia"
-            />
+            <div class="image-container">
+                <img
+                    :src="baseUrl('task_empty.svg')"
+                    alt="Frase tarefas vazias e uma imagem de uma caixa vazia"
+                    width="400"
+                    height="400"
+                />
+
+                <span class="text">Nenhuma tarefa encontrada</span>
+            </div>
         </RouterLink>
     </div>
 </template>

@@ -108,7 +108,7 @@ const suggestTask = async (tasks: Task[], userId: string): Promise<SuggestionRes
 
         return parsedResponse;
     } catch (error: any) {
-        return { error: error.message };
+        return { error: "Erro ao se comunicar com a API do Gemini." };
     }
 };
 
