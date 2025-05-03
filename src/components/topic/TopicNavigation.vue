@@ -15,9 +15,16 @@ import TopicFormEdit from "../forms/TopicFormEdit.vue";
 import UIButton from "../ui/UIButton.vue";
 import CreatorLink from "../shared/CreatorLink.vue";
 
-const emit = defineEmits<{
+interface TopicNavigationProps {
+    data?: Topic[] | null;
+}
+
+type TopicNavigationEmits = {
     (e: "close"): void;
-}>();
+};
+
+const props = defineProps<TopicNavigationProps>();
+const emit = defineEmits<TopicNavigationEmits>();
 
 const { deleteTopic, deleteAllTopics } = useTopic();
 const { showToast } = useToast();
@@ -25,12 +32,6 @@ const { user } = useAuthStore();
 
 const router = useRouter();
 const modal = useModal();
-
-interface TopicNavigationProps {
-    data?: Topic[] | null;
-}
-
-const props = defineProps<TopicNavigationProps>();
 
 const { setConfirmModal } = useConfirmModal();
 

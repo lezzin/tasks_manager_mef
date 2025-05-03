@@ -5,24 +5,22 @@ interface CommentModalProps {
     comment?: string;
 }
 
-const props = defineProps<CommentModalProps>();
-const emit = defineEmits<{
+type CommentModalEmits = {
     (e: "close"): void;
-}>();
-
-const closeShowingComment = () => {
-    emit("close");
 };
+
+defineProps<CommentModalProps>();
+defineEmits<CommentModalEmits>();
 </script>
 
 <template>
-    <UIModal @close="closeShowingComment" titleId="comment-modal-title">
+    <UIModal @close="$emit('close')" titleId="comment-modal-title">
         <template #title>Comentários da tarefa</template>
 
         <template #body>
             <div
                 class="markdown-content markdown-content--normal"
-                v-html="props.comment"
+                v-html="comment"
                 aria-live="polite"
                 aria-describedby="comment-modal-title"
                 role="document"

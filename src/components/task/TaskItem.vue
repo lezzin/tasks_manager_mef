@@ -8,22 +8,6 @@ import { useRoute, useRouter } from "vue-router";
 
 import UIButton from "../ui/UIButton.vue";
 
-const props = withDefaults(defineProps<TaskItemProps>(), {
-    showPriorities: true,
-    showEdit: true,
-    showDelete: true,
-    showComments: true,
-    showCompletedStatus: true,
-    variant: "normal",
-});
-
-const emit = defineEmits<{
-    (e: "changeStatus", task: Task): void;
-    (e: "openComment", comment: string): void;
-    (e: "edit", task: Task): void;
-    (e: "delete", task: Task): void;
-}>();
-
 interface TaskItemProps {
     task: Task;
     showPriorities?: boolean;
@@ -33,6 +17,24 @@ interface TaskItemProps {
     showCompletedStatus?: boolean;
     variant?: string;
 }
+
+type TaskItemEmits = {
+    (e: "changeStatus", task: Task): void;
+    (e: "openComment", comment: string): void;
+    (e: "edit", task: Task): void;
+    (e: "delete", task: Task): void;
+};
+
+const props = withDefaults(defineProps<TaskItemProps>(), {
+    showPriorities: true,
+    showEdit: true,
+    showDelete: true,
+    showComments: true,
+    showCompletedStatus: true,
+    variant: "normal",
+});
+
+const emit = defineEmits<TaskItemEmits>();
 
 const attrs = useAttrs();
 const route = useRoute();

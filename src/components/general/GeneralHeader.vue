@@ -6,10 +6,12 @@ interface GeneralHeaderProps {
     isDownloading: boolean;
 }
 
-defineProps<GeneralHeaderProps>();
-const emit = defineEmits<{
+type GeneralHeaderEmits = {
     (e: "download"): void;
-}>();
+};
+
+defineProps<GeneralHeaderProps>();
+const emit = defineEmits<GeneralHeaderEmits>();
 
 const router = useRouter();
 </script>

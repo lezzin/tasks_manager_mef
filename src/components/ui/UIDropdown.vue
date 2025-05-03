@@ -5,10 +5,12 @@ interface UIDropdownProps {
     isActive: boolean;
 }
 
-const props = defineProps<UIDropdownProps>();
-const emit = defineEmits<{
+type UIDropdownEmits = {
     (e: "trigger"): void;
-}>();
+};
+
+const props = defineProps<UIDropdownProps>();
+const emit = defineEmits<UIDropdownEmits>();
 
 const dropdown = ref(null);
 </script>

@@ -8,6 +8,11 @@ interface GeneralLegendProps {
     priorityClass: string;
 }
 
+type GeneralLegendEmits = {
+    (e: "focus"): void;
+    (e: "unfocus"): void;
+};
+
 const priorities: Record<string, string> = {
     "priority-high": "Alta prioridade",
     "priority-medium": "Média prioridade",
@@ -16,18 +21,15 @@ const priorities: Record<string, string> = {
 };
 
 defineProps<GeneralLegendProps>();
-const emit = defineEmits<{
-    (e: "focus"): void;
-    (e: "unfocus"): void;
-}>();
+defineEmits<GeneralLegendEmits>();
 </script>
 
 <template>
     <div
         class="legend__item"
         :class="priorityClass"
-        @mouseover="emit('focus')"
-        @mouseleave="emit('unfocus')"
+        @mouseover="$emit('focus')"
+        @mouseleave="$emit('unfocus')"
         aria-label="Tarefas concluídas: {{ counter }}"
         tabindex="0"
     >

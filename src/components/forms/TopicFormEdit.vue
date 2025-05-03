@@ -15,10 +15,12 @@ interface TopicFormEditProps {
     topic?: string;
 }
 
-const props = defineProps<TopicFormEditProps>();
-const emit = defineEmits<{
+type TopicFormEditEmits = {
     (e: "close"): void;
-}>();
+};
+
+const props = defineProps<TopicFormEditProps>();
+const emit = defineEmits<TopicFormEditEmits>();
 
 const oldName = ref<string>("");
 const name = ref<string>("");

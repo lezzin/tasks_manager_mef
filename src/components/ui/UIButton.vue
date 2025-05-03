@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { ButtonType, ButtonVariant } from "@/types/UIButton";
 import { RouterLink } from "vue-router";
 import { useAttrs } from "vue";
-import type { ButtonType, ButtonVariant } from "@/types/UIBUtton";
 
 const props = defineProps<{
     isLink?: boolean;

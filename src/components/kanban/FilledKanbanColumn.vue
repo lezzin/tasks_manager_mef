@@ -12,13 +12,15 @@ interface FilledKanbanColumnProps {
     kanbanStatus: TaskStatus;
 }
 
-const props = defineProps<FilledKanbanColumnProps>();
-const emit = defineEmits<{
+type FilledKanbanColumnEmits = {
     (e: "onDragEnter"): void;
     (e: "dragEvents", event?: DragEvent, action?: DragAction, task?: Task): void;
     (e: "moveTask", task: Task, direction: TaskDirection): void;
     (e: "onDrop"): void;
-}>();
+};
+
+const props = defineProps<FilledKanbanColumnProps>();
+const emit = defineEmits<FilledKanbanColumnEmits>();
 
 const sidebarStore = useSidebarStore();
 

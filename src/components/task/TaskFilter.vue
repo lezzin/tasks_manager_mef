@@ -7,12 +7,13 @@ interface TaskFilterProps {
     searchTask: string;
 }
 
-const props = defineProps<TaskFilterProps>();
-
-const emit = defineEmits<{
+type TaskFilterEmits = {
     (e: "search", value: string): void;
     (e: "filter", value: string): void;
-}>();
+};
+
+const props = defineProps<TaskFilterProps>();
+const emit = defineEmits<TaskFilterEmits>();
 
 const localSearch = ref(props.searchTask);
 const localFilter = ref(props.filterTask);

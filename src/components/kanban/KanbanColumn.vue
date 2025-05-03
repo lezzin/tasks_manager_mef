@@ -11,13 +11,15 @@ interface KanbanColumnProps {
     tasks: TaskList;
 }
 
-defineProps<KanbanColumnProps>();
-const emit = defineEmits<{
+type KanbanColumnEmits = {
     (e: "onDragEnter", event: DragEvent, kanbanStatus: TaskStatus): void;
     (e: "dragEvents", event?: DragEvent, action?: DragAction, task?: Task): void;
     (e: "moveTask", task: Task, direction: TaskDirection): void;
     (e: "onDrop", kanbanStatus: TaskStatus): void;
-}>();
+};
+
+defineProps<KanbanColumnProps>();
+const emit = defineEmits<KanbanColumnEmits>();
 
 const getStatusLabel = (status: string) => {
     const statuses: Record<string, string> = {

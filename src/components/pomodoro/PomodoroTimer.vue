@@ -13,6 +13,15 @@ defineProps({ hasTasks: { type: Boolean } });
 const { showToast } = useToast();
 const { setConfirmModal } = useConfirmModal();
 
+interface Timer {
+    minutes: number;
+    seconds: number;
+    cycleCount: number;
+    active: boolean;
+    paused: boolean;
+    onBreak: boolean;
+}
+
 const TIME_CONSTANTS = {
     ONE_SECOND: 1000,
     WORK: { minutes: 24, seconds: 59 },
@@ -22,14 +31,7 @@ const TIME_CONSTANTS = {
     PAUSE_PER_CYCLE_IN_MINUTES: 5,
 };
 
-const timer = reactive<{
-    minutes: number;
-    seconds: number;
-    cycleCount: number;
-    active: boolean;
-    paused: boolean;
-    onBreak: boolean;
-}>({
+const timer = reactive<Timer>({
     minutes: TIME_CONSTANTS.WORK.minutes,
     seconds: TIME_CONSTANTS.WORK.seconds,
     cycleCount: 1,

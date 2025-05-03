@@ -22,16 +22,17 @@ interface TaskFormAddProps {
     id: string;
 }
 
+type TaskFormAddEmits = {
+    (e: "close"): void;
+};
+
 interface geminiSuggestedTaskProps {
     data: SuggestionResponse | null;
     usageRemaining: number | null;
 }
 
 const props = defineProps<TaskFormAddProps>();
-
-const emit = defineEmits<{
-    (e: "close"): void;
-}>();
+const emit = defineEmits<TaskFormAddEmits>();
 
 const { user } = useAuthStore();
 const { suggestTask, getUsageCount } = useGemini();

@@ -5,13 +5,15 @@ interface UIModalProps {
     titleId: string;
 }
 
+type UIModalEmits = {
+    (e: "close"): void;
+};
+
 withDefaults(defineProps<UIModalProps>(), {
     titleId: "modal-title",
 });
 
-const emit = defineEmits<{
-    (e: "close"): void;
-}>();
+const emit = defineEmits<UIModalEmits>();
 
 const closeModal = () => emit("close");
 </script>

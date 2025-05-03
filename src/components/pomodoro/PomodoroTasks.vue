@@ -17,21 +17,17 @@ import UIButton from "../ui/UIButton.vue";
 import type { Task } from "@/interfaces/Task.ts";
 import TaskItem from "../task/TaskItem.vue";
 
-defineProps({
-    hasTasks: { type: Boolean },
-});
+defineProps({ hasTasks: { type: Boolean } });
 
-const { showToast } = useToast();
 const { user } = useAuthStore();
 const loadingStore = useLoadingStore();
 
+const { getUserTasksWithTopic, changeStatus } = useTask();
+const { showToast } = useToast();
 const router = useRouter();
 const modal = useModal();
-const { getUserTasksWithTopic, changeStatus } = useTask();
 
-const tasks = reactive<{
-    data: Task[] | [];
-}>({ data: [] });
+const tasks = reactive<{ data: Task[] | [] }>({ data: [] });
 
 const isDropdownOpen = ref<boolean>(false);
 const selectedComment = ref<string>("");
