@@ -22,7 +22,7 @@ const parseResponse = (response: string): SuggestionResponse => {
     try {
         const sanitizedResponse = JSON.parse(sanitizeJSON(response.replace(/```json|```/g, "")));
         return sanitizedResponse;
-    } catch (error: any) {
+    } catch (error) {
         return { error: "Erro ao processar a resposta. Tente novamente." };
     }
 };
@@ -107,7 +107,7 @@ const suggestTask = async (tasks: Task[], userId: string): Promise<SuggestionRes
         }
 
         return parsedResponse;
-    } catch (error: any) {
+    } catch (error) {
         return { error: "Erro ao se comunicar com a API do Gemini." };
     }
 };

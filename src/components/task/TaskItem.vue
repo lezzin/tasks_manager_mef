@@ -64,8 +64,6 @@ const classes = computed(() => {
 });
 
 const focusOnTask = () => {
-    console.log(props.task);
-
     if (!canFocus.value) return;
 
     isFocusing.value = true;
